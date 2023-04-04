@@ -1,19 +1,20 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    },
-    {
-        "src": "public/**",
-        "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
+    "version": 2,
+    "name": "gsaServe",
+    "builds": [
+        {
+            "src": "server.js",
+            "use": "@vercel/node"
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
             "src": "/api/(.*)",
-            "dest": "/server.js"
+            "dest": "/api/server.js"
         },
         {
             "src": "/",
@@ -23,5 +24,5 @@
             "src": "/(.+)",
             "dest": "public/$1"
         }
-  ]
+    ]
 }
