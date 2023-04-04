@@ -3,7 +3,7 @@
     "name": "gsaServe",
     "builds": [
         {
-            "src": "server.js",
+            "src": "/api/server.js",
             "use": "@vercel/node"
         },
         {
