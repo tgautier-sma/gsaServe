@@ -16,7 +16,7 @@ app.get('/about', (req, res) => {
     res.send('This is my about route..... ')
 })
 app.post('/event', (req, res) => {
-    console.log(req.body);
+    console.info(req.body);
     res.send('POST EVENT request received. See Log for data received.')
 })
 
