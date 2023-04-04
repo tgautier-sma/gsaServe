@@ -17,7 +17,9 @@ app.get('/about', (req, res) => {
 })
 app.post('/event', (req, res) => {
     console.info(req.body);
-    res.send('POST EVENT request received. See Log for data received.')
+    res.send(
+        { msg: 'POST EVENT request received. See Log for data received.', data: req.body }
+    );
 })
 
 // Export the Express API
