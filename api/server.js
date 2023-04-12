@@ -1,9 +1,11 @@
 // server.js
-const express = require('express')
+const express = require('express');
+const helmet = require("helmet");
 const bodyParser = require('body-parser');
-const db = require('../lib/db');
+// const db = require('../lib/db');
 
 const app = express();
+app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
@@ -18,7 +20,7 @@ app.get('/api/about', (req, res) => {
 })
 
 app.get('/api/connect', (req, res) => {
-    db.connect();
+    // db.connect();
     res.send('This is a db connect..... ')
 })
 
