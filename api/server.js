@@ -25,6 +25,7 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
+const geo = require("../api/geo");
 
 const app = express();
 app.use(helmet());
@@ -58,6 +59,19 @@ app.post('/api/event', (req, res) => {
         }
     );
 })
+// APi for GeoPortail
+app.get('/api/geo/config', (req, res) => {
+    geo.getGeoConfig().then(config => {
+        console.log("=====DATA", config);
+        res.send(config);
+    }).catch(error => {
+        res.send(error);
+    });
+});
 
+const port = 3000
+app.listen(port, function () {
+    console.log('gsaServe app listening on port ' + port + '!');
+});
 // Export the Express API
 module.exports = app
