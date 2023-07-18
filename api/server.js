@@ -53,6 +53,7 @@ app.post('/api/event', (req, res) => {
     res.send(
         {
             msg: 'POST EVENT request received. See Log for data received.',
+            ts: new Date(),
             query: req.query,
             params: req.params,
             body: req.body
