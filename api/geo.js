@@ -24,6 +24,7 @@ exports.getGeoConfig = async () => {
         return false;
     })
 }
+
 exports.readGeoConfig = async () => {
     console.log("(r) Geo : read config");
     return new Promise((resolve, reject) => {
