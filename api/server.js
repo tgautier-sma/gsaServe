@@ -29,7 +29,8 @@ const geo = require("../api/geo");
 
 const app = express();
 app.use(helmet());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
