@@ -26,6 +26,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 const geo = require("../api/geo");
+const sqlDb = require("../api/db");
 
 const app = express();
 app.use(helmet());
@@ -66,6 +67,15 @@ app.get('/api/geo/config', (req, res) => {
     geo.getGeoConfig().then(config => {
         console.log("=====DATA", config);
         res.send(config);
+    }).catch(error => {
+        res.send(error);
+    });
+});
+app.get('/api/db', (req, res) => {
+    console.log("Read DB");
+    sqlDb.readDb().then(data => {
+        console.log("=====DATA", data);
+        res.send(data);
     }).catch(error => {
         res.send(error);
     });
