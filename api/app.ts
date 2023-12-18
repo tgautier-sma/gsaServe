@@ -2,7 +2,7 @@ const env = process.env;
 import express from 'express';
 import helmet from "helmet";
 import bodyParser from 'body-parser';
-// const db = require('../lib/db');
+
 // logging system
 import winston from 'winston';
 const logger = winston.createLogger({
@@ -24,8 +24,8 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-import {getGeoConfig} from "../api/geo";
-import { readDb } from "../api/db";
+import { getGeoConfig } from "../api/geo";
+import { readDb, testDb } from "../api/db";
 
 const app = express();
 app.use(helmet());
@@ -61,11 +61,11 @@ app.post('/api/event', (req, res) => {
         }
     );
 })
-// APi for GeoPortail
 
+// APi for GeoPortail
 app.get('/api/geo/config', (req, res) => {
     getGeoConfig().then((config: any) => {
-        console.log("=====DATA", config);
+        console.log("(i) Config", config);
         res.send(config);
     }).catch((error: any) => {
         res.send(error);
@@ -75,6 +75,15 @@ app.get('/api/geo/config', (req, res) => {
 app.get('/api/db', (req, res) => {
     console.log("Read DB");
     readDb().then((data: any) => {
+        console.log("=====DATA", data);
+        res.send(data);
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
+app.get('/api/dbtest', (req, res) => {
+    console.log("Test DB");
+    testDb().then((data: any) => {
         console.log("=====DATA", data);
         res.send(data);
     }).catch((error: any) => {
