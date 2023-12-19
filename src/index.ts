@@ -2,7 +2,7 @@ const env = process.env;
 import express from 'express';
 import helmet from "helmet";
 import bodyParser from 'body-parser';
-import 'dotenv/config'
+import 'dotenv/config';
 
 // logging system
 import winston from 'winston';
