@@ -1,11 +1,11 @@
-// server.js
 const env = process.env;
-const express = require('express');
-const helmet = require("helmet");
-const bodyParser = require('body-parser');
-// const db = require('../lib/db');
+import express from 'express';
+import helmet from "helmet";
+import bodyParser from 'body-parser';
+import 'dotenv/config'
+
 // logging system
-const winston = require('winston');
+import winston from 'winston';
 const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
@@ -25,8 +25,8 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
-const geo = require("../api/geo");
-const sqlDb = require("../api/db");
+import { getGeoConfig } from "./api/geo";
+import { readDb, testDb } from "./api/db";
 
 const app = express();
 app.use(helmet());
@@ -62,21 +62,39 @@ app.post('/api/event', (req, res) => {
         }
     );
 })
+
 // APi for GeoPortail
 app.get('/api/geo/config', (req, res) => {
-    geo.getGeoConfig().then(config => {
-        console.log("=====DATA", config);
+    getGeoConfig().then((config: any) => {
+        console.log("(i) Config", config);
         res.send(config);
-    }).catch(error => {
+    }).catch((error: any) => {
         res.send(error);
     });
 });
+
 app.get('/api/db', (req, res) => {
-    console.log("Read DB");
-    sqlDb.readDb().then(data => {
-        console.log("=====DATA", data);
+    const db = req.query.db || 'cards';
+    const page = req.query.page || '1';
+    const size = req.query.pageSize || '100';
+    const id = req.query.id || null;
+    const email = req.query.email || null;
+    const dbName:string=db.toString();
+    const pageNumber: string = page.toString();
+    const pageSize: string = size.toString();
+
+    logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
+    readDb(dbName, id, email, pageNumber,pageSize).then((data: any) => {
         res.send(data);
-    }).catch(error => {
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
+app.get('/api/db/test', (req, res) => {
+    console.log("Test DB");
+    testDb().then((data: any) => {
+        res.send(data);
+    }).catch((error: any) => {
         res.send(error);
     });
 });

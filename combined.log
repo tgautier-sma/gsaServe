@@ -192,3 +192,6 @@
 {"level":"info","message":"System launch","service":"gsa-serve"}
 {"level":"info","message":"System launch","service":"gsa-serve"}
 {"level":"info","message":"Read DB cards,page 1, pageSize 100","service":"gsa-serve"}
+{"level":"info","message":"System launch","service":"gsa-serve"}
+{"level":"info","message":"Read DB cards,page 1, pageSize 100","service":"gsa-serve"}
+{"level":"info","message":"System launch","service":"gsa-serve"}
