@@ -2,6 +2,7 @@ const env = process.env;
 import express from 'express';
 import helmet from "helmet";
 import bodyParser from 'body-parser';
+import 'dotenv/config'
 
 // logging system
 import winston from 'winston';
@@ -73,18 +74,25 @@ app.get('/api/geo/config', (req, res) => {
 });
 
 app.get('/api/db', (req, res) => {
-    console.log("Read DB");
-    readDb().then((data: any) => {
-        console.log("=====DATA", data);
+    const db = req.query.db || 'cards';
+    const page = req.query.page || '1';
+    const size = req.query.pageSize || '100';
+    const id = req.query.id || null;
+    const email = req.query.email || null;
+    const dbName:string=db.toString();
+    const pageNumber: string = page.toString();
+    const pageSize: string = size.toString();
+
+    logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
+    readDb(dbName, id, email, pageNumber,pageSize).then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);
     });
 });
-app.get('/api/dbtest', (req, res) => {
+app.get('/api/db/test', (req, res) => {
     console.log("Test DB");
     testDb().then((data: any) => {
-        console.log("=====DATA", data);
         res.send(data);
     }).catch((error: any) => {
         res.send(error);
