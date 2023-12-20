@@ -2,6 +2,7 @@ const env = process.env;
 import express from 'express';
 import helmet from "helmet";
 import bodyParser from 'body-parser';
+import path from 'path';
 import 'dotenv/config';
 
 // logging system
@@ -35,7 +36,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
-logger.info("System launch");
+logger.info("System launched");
 
 app.get('/api', (req, res) => {
     res.send('Hey ! this is my API running 🥳')
