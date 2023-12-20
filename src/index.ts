@@ -39,7 +39,7 @@ app.use(bodyParser.text());
 logger.info("System launched");
 
 app.get("/", (req, res) => {
-	res.send("Hello from server !");
+	res.send("👍 Server working well!");
 });
 
 app.get('/api', (req, res) => {
