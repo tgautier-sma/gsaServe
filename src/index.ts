@@ -40,8 +40,6 @@ logger.info("System launched");
 
 app.get("/", (req, res) => {
 	res.send("👍 Server working well!");
-    res.sendFile(app.static(path.resolve(__dirname, '../public/')))
-app.get('/', ); – 
 });
 
 app.get('/api', (req, res) => {
