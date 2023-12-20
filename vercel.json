@@ -5,6 +5,10 @@
             "src": "dist/index.js",
             "use": "@vercel/node",
             "config": { "includeFiles": ["dist/**"] }
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
         }
     ],
     "routes": [
@@ -20,8 +24,5 @@
             "src": "/(.+)",
             "dest": "public/$1"
         }
-    ],
-    "redirects": [
-        { "source": "/", "destination": "/public/index.html", "permanent": false }
-      ]
+    ]
 }
