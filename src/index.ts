@@ -38,6 +38,10 @@ app.use(bodyParser.raw());
 app.use(bodyParser.text());
 logger.info("System launched");
 
+app.get("/", (req, res) => {
+	res.send("Hello from server !");
+});
+
 app.get('/api', (req, res) => {
     res.send('Hey ! this is my API running 🥳')
 })
