@@ -24,5 +24,8 @@
             "src": "/(.+)",
             "dest": "public/$1"
         }
-    ]
+    ],
+    "redirects": [
+        { "source": "/", "destination": "/public/index.html", "permanent": false }
+      ]
 }
