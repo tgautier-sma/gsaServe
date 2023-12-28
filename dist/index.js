@@ -9,6 +9,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const body_parser_1 = __importDefault(require("body-parser"));
 var cors = require('cors');
 require("dotenv/config");
+// Vercel Analytics
 const analytics_1 = require("@vercel/analytics");
 (0, analytics_1.inject)();
 // logging system
@@ -31,17 +32,27 @@ if (process.env.NODE_ENV !== 'production') {
         format: winston_1.default.format.simple(),
     }));
 }
+/**
+ * Import functions for router access
+ */
 const geo_1 = require("./api/geo");
 const db_1 = require("./api/db");
+/**
+ * Configure server application
+ */
 const app = (0, express_1.default)();
 app.use(cors());
 app.use((0, helmet_1.default)());
+app.disable('x-powered-by');
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.raw());
 app.use(body_parser_1.default.text());
 logger.info("System launched");
+/**
+ * APIs for general access to server
+ */
 app.get("/", (req, res) => {
     res.send("👍 Server working well!");
 });
@@ -49,7 +60,7 @@ app.get('/api', (req, res) => {
     res.send('Hey ! this is my API running 🥳');
 });
 app.get('/api/about', (req, res) => {
-    res.send('This is my about route..... ');
+    res.send('👌 This is my about route..... ');
 });
 app.get('/api/connect', (req, res) => {
     // db.connect();
@@ -65,7 +76,9 @@ app.post('/api/event', (req, res) => {
         body: req.body
     });
 });
-// APi for GeoPortail
+/**
+ * API for GeoPortail access
+ */
 app.get('/api/geo/config', (req, res) => {
     (0, geo_1.getGeoConfig)().then((config) => {
         console.log("(i) Config", config);
@@ -74,6 +87,9 @@ app.get('/api/geo/config', (req, res) => {
         res.send(error);
     });
 });
+/**
+ * API for db access - postgres on Vercel
+ */
 app.get('/api/db', (req, res) => {
     const db = req.query.db || 'cards';
     const page = req.query.page || '1';

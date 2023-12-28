@@ -5,8 +5,10 @@ import bodyParser from 'body-parser';
 var cors = require('cors')
 import path from 'path';
 import 'dotenv/config';
+// Vercel Analytics
 import { inject } from '@vercel/analytics';
 inject();
+
 // logging system
 import winston from 'winston';
 const logger = winston.createLogger({
@@ -28,19 +30,28 @@ if (process.env.NODE_ENV !== 'production') {
     }));
 }
 
+/**
+ * Import functions for router access
+ */
 import { getGeoConfig } from "./api/geo";
 import { readDb, testDb } from "./api/db";
 
+/**
+ * Configure server application
+ */
 const app = express();
-app.use(cors())
+app.use(cors());
 app.use(helmet());
+app.disable('x-powered-by');
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
 logger.info("System launched");
-
+/**
+ * APIs for general access to server
+ */
 app.get("/", (req, res) => {
 	res.send("👍 Server working well!");
 });
@@ -50,7 +61,7 @@ app.get('/api', (req, res) => {
 })
 
 app.get('/api/about', (req, res) => {
-    res.send('This is my about route..... ')
+    res.send('👌 This is my about route..... ')
 })
 
 app.get('/api/connect', (req, res) => {
@@ -71,7 +82,9 @@ app.post('/api/event', (req, res) => {
     );
 })
 
-// APi for GeoPortail
+/**
+ * API for GeoPortail access
+ */
 app.get('/api/geo/config', (req, res) => {
     getGeoConfig().then((config: any) => {
         console.log("(i) Config", config);
@@ -81,6 +94,9 @@ app.get('/api/geo/config', (req, res) => {
     });
 });
 
+/**
+ * API for db access - postgres on Vercel
+ */
 app.get('/api/db', (req, res) => {
     const db = req.query.db || 'cards';
     const page = req.query.page || '1';
