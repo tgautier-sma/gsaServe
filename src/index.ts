@@ -2,6 +2,7 @@ const env = process.env;
 import express from 'express';
 import helmet from "helmet";
 import bodyParser from 'body-parser';
+var cors = require('cors')
 import path from 'path';
 import 'dotenv/config';
 import { inject } from '@vercel/analytics';
@@ -31,6 +32,7 @@ import { getGeoConfig } from "./api/geo";
 import { readDb, testDb } from "./api/db";
 
 const app = express();
+app.use(cors())
 app.use(helmet());
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));

@@ -7,6 +7,7 @@ const env = process.env;
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const body_parser_1 = __importDefault(require("body-parser"));
+var cors = require('cors');
 require("dotenv/config");
 const analytics_1 = require("@vercel/analytics");
 (0, analytics_1.inject)();
@@ -33,6 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
 const geo_1 = require("./api/geo");
 const db_1 = require("./api/db");
 const app = (0, express_1.default)();
+app.use(cors());
 app.use((0, helmet_1.default)());
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
