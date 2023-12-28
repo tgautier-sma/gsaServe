@@ -4,7 +4,8 @@ import helmet from "helmet";
 import bodyParser from 'body-parser';
 import path from 'path';
 import 'dotenv/config';
-
+import { inject } from '@vercel/analytics';
+inject();
 // logging system
 import winston from 'winston';
 const logger = winston.createLogger({

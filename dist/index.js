@@ -8,6 +8,8 @@ const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const body_parser_1 = __importDefault(require("body-parser"));
 require("dotenv/config");
+const analytics_1 = require("@vercel/analytics");
+(0, analytics_1.inject)();
 // logging system
 const winston_1 = __importDefault(require("winston"));
 const logger = winston_1.default.createLogger({
