@@ -114,6 +114,115 @@ app.get('/api/db/test', (req, res) => {
         res.send(error);
     });
 });
+// Api for apps request
+app.get('/api/db/apps', (req, res) => {
+    (0, db_1.getApps)().then((data) => {
+        res.send(data);
+    }).catch((error) => {
+        res.send(error);
+    });
+});
+app.get('/api/db/app/uid', (req, res) => {
+    const email = req.query.email || null;
+    const app = req.query.app || null;
+    if (email && app) {
+        (0, db_1.createApp)(app, email).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            res.send({
+                ts: new Date(),
+                status: 'error',
+                msg: 'Email and application code already exists. No account created.'
+            });
+        });
+    }
+    else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Email and application code is mandatory. No account created.'
+        });
+    }
+});
+// Api Store Request
+app.get('/api/db/stores', (req, res) => {
+    (0, db_1.getStore)().then((data) => {
+        res.send(data);
+    }).catch((error) => {
+        res.send(error);
+    });
+});
+// createStoreKey
+app.get('/api/db/store', (req, res) => {
+    const uid = req.query.uid || null;
+    const key = req.query.key || null;
+    const values = req.query.data || req.body || { "default": new Date() };
+    if (uid && key) {
+        (0, db_1.createStoreKey)(uid, key, values).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            if (error.code == "23503") {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Application code ${uid} unknown. No store created.`
+                });
+            }
+            else {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Key ${key} for this application code already exists. No store created.`
+                });
+            }
+        });
+    }
+    else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code, key are mandatory. No store created.'
+        });
+    }
+});
+app.get('/api/db/store/key', (req, res) => {
+    const uid = req.query.uid || null;
+    const key = req.query.key || null;
+    if (uid && key) {
+        (0, db_1.getStoreKey)(uid, key).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            res.send(error);
+        });
+    }
+    else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code, key are mandatory. No store readed.'
+        });
+    }
+});
+app.get('/api/db/store/app', (req, res) => {
+    const uid = req.query.uid || null;
+    if (uid) {
+        (0, db_1.getStoreApp)(uid).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            res.send(error);
+        });
+    }
+    else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code is mandatory. No store readed.'
+        });
+    }
+});
+// Activate Application server
 const port = 3000;
 app.listen(port, function () {
     console.log('gsaServe app listening on port ' + port + '!');

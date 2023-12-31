@@ -34,7 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
  * Import functions for router access
  */
 import { getGeoConfig } from "./api/geo";
-import { readDb, testDb } from "./api/db";
+import { readDb, testDb, getApps, createApp, getStore, createStoreKey, getStoreKey, getStoreApp } from "./api/db";
 
 /**
  * Configure server application
@@ -53,7 +53,7 @@ logger.info("System launched");
  * APIs for general access to server
  */
 app.get("/", (req, res) => {
-	res.send("👍 Server working well!");
+    res.send("👍 Server working well!");
 });
 
 app.get('/api', (req, res) => {
@@ -103,12 +103,12 @@ app.get('/api/db', (req, res) => {
     const size = req.query.pageSize || '100';
     const id = req.query.id || null;
     const email = req.query.email || null;
-    const dbName:string=db.toString();
+    const dbName: string = db.toString();
     const pageNumber: string = page.toString();
     const pageSize: string = size.toString();
 
     logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
-    readDb(dbName, id, email, pageNumber,pageSize).then((data: any) => {
+    readDb(dbName, id, email, pageNumber, pageSize).then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);
@@ -122,7 +122,115 @@ app.get('/api/db/test', (req, res) => {
         res.send(error);
     });
 });
+// Api for apps request
+app.get('/api/db/apps', (req, res) => {
+    getApps().then((data: any) => {
+        res.send(data);
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
 
+app.get('/api/db/app/uid', (req, res) => {
+    const email = req.query.email || null;
+    const app = req.query.app || null;
+    if (email && app) {
+        createApp(app, email).then((data: any) => {
+            res.send(data);
+        }).catch((error: any) => {
+            res.send({
+                ts: new Date(),
+                status: 'error',
+                msg: 'Email and application code already exists. No account created.'
+            });
+        });
+    } else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Email and application code is mandatory. No account created.'
+        });
+    }
+
+});
+
+// Api Store Request
+app.get('/api/db/stores', (req, res) => {
+    getStore().then((data: any) => {
+        res.send(data);
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
+// createStoreKey
+app.get('/api/db/store', (req, res) => {
+    const uid = req.query.uid || null;
+    const key = req.query.key || null;
+    const values = req.query.data || req.body || { "default": new Date() };
+    if (uid && key) {
+        createStoreKey(uid, key, values).then((data: any) => {
+            res.send(data);
+        }).catch((error: any) => {
+            if (error.code == "23503") {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Application code ${uid} unknown. No store created.`
+                });
+            } else {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Key ${key} for this application code already exists. No store created.`
+                });
+            }
+        });
+    } else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code, key are mandatory. No store created.'
+        });
+    }
+
+});
+app.get('/api/db/store/key', (req, res) => {
+    const uid = req.query.uid || null;
+    const key = req.query.key || null;
+    if (uid && key) {
+        getStoreKey(uid, key).then((data: any) => {
+            res.send(data);
+        }).catch((error: any) => {
+            res.send(error);
+        });
+    } else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code, key are mandatory. No store readed.'
+        });
+    }
+});
+app.get('/api/db/store/app', (req, res) => {
+    const uid = req.query.uid || null;
+    if (uid) {
+        getStoreApp(uid).then((data: any) => {
+            res.send(data);
+        }).catch((error: any) => {
+            res.send(error);
+        });
+    } else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code is mandatory. No store readed.'
+        });
+    }
+});
+
+// Activate Application server
 const port = 3000
 app.listen(port, function () {
     console.log('gsaServe app listening on port ' + port + '!');

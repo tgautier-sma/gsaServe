@@ -1,6 +1,7 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, db } from "@vercel/postgres";
+import { genUniqueId } from '../tools';
 
 /* 
 import { createKysely } from "@vercel/postgres-kysely";
@@ -38,4 +39,47 @@ export const testDb = async () => {
     const client = await db.connect();
     const ret = await client.sql`SELECT 1`;
     return ret;
+}
+// Table APPS
+export const getApps = async () => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from apps`;
+    return ret.rows;
+}
+export const createApp = async (app: any, email: any) => {
+    const client = await db.connect();
+    const uid = genUniqueId();
+    const ret = await client.sql`INSERT INTO public.apps (uid,app,email) VALUES (${uid},${app},${email})`;
+    if (ret.rowCount == 1) {
+        return { api: "createApp", status: "created", email: email, app: app, uid: uid }
+    } else {
+        return ret;
+    }
+}
+
+// Table store
+export const getStore = async () => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from store`;
+    return ret.rows;
+}
+export const getStoreKey = async (uid: any, key: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from store WHERE uid=${uid} AND keystore=${key}`;
+    return ret.rows[0].data;
+}
+export const getStoreApp = async (uid: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from store WHERE uid=${uid}`;
+    return ret.rows;
+}
+export const createStoreKey = async (uid: any, key: any, value: any) => {
+    const client = await db.connect();
+    const data = (typeof value === "string" ? JSON.stringify({data:value}) : JSON.stringify(value));
+    const ret = await client.sql`INSERT INTO public.store (uid,keystore,data) VALUES (${uid},${key},${data})`;
+    if (ret.rowCount == 1) {
+        return { api: "createStoreKey", status: "created", uid: uid,key: key, data: data }
+    } else {
+        return ret;
+    }
 }
