@@ -46,6 +46,11 @@ export const getApps = async () => {
     const ret = await client.sql`SELECT * from apps`;
     return ret.rows;
 }
+export const getApp = async (app:any) => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from apps WHERE app=${app}`;
+    return ret.rows;
+}
 export const createApp = async (app: any, email: any) => {
     const client = await db.connect();
     const uid = genUniqueId();
@@ -58,7 +63,7 @@ export const createApp = async (app: any, email: any) => {
 }
 
 // Table store
-export const getStore = async () => {
+export const getStores = async () => {
     const client = await db.connect();
     const ret = await client.sql`SELECT * from store`;
     return ret.rows;
@@ -75,10 +80,29 @@ export const getStoreApp = async (uid: any) => {
 }
 export const createStoreKey = async (uid: any, key: any, value: any) => {
     const client = await db.connect();
-    const data = (typeof value === "string" ? JSON.stringify({data:value}) : JSON.stringify(value));
+    const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));
     const ret = await client.sql`INSERT INTO public.store (uid,keystore,data) VALUES (${uid},${key},${data})`;
     if (ret.rowCount == 1) {
-        return { api: "createStoreKey", status: "created", uid: uid,key: key, data: data }
+        return { api: "createStoreKey", status: "created", uid: uid, key: key, data: data }
+    } else {
+        return ret;
+    }
+}
+export const updateStoreKey = async (uid: any, key: any, value: any) => {
+    const client = await db.connect();
+    const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));
+    const ret = await client.sql`UPDATE public.store SET data=${data} WHERE uid=${uid} AND keystore=${key}`;
+    if (ret.rowCount == 1) {
+        return { api: "updateStoreKey", status: "updated", uid: uid, key: key, data: data }
+    } else {
+        return ret;
+    }
+}
+export const deleteStoreKey = async (uid: any, key: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`DELETE FROM public.store WHERE uid=${uid} AND keystore=${key}`;
+    if (ret.rowCount == 1) {
+        return { api: "deleteStoreKey", status: "deleted", uid: uid, key: key }
     } else {
         return ret;
     }

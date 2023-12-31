@@ -114,7 +114,9 @@ app.get('/api/db/test', (req, res) => {
         res.send(error);
     });
 });
-// Api for apps request
+/**
+ * Api for apps request
+ */
 app.get('/api/db/apps', (req, res) => {
     (0, db_1.getApps)().then((data) => {
         res.send(data);
@@ -144,9 +146,20 @@ app.get('/api/db/app/uid', (req, res) => {
         });
     }
 });
+app.get('/api/db/app', (req, res) => {
+    const app = req.query.app || null;
+    (0, db_1.getApp)(app).then((data) => {
+        res.send(data);
+    }).catch((error) => {
+        res.send(error);
+    });
+});
+/**
+ * API for store json database
+ */
 // Api Store Request
 app.get('/api/db/stores', (req, res) => {
-    (0, db_1.getStore)().then((data) => {
+    (0, db_1.getStores)().then((data) => {
         res.send(data);
     }).catch((error) => {
         res.send(error);
@@ -183,7 +196,74 @@ app.get('/api/db/store', (req, res) => {
         res.send({
             ts: new Date(),
             status: 'error',
-            msg: 'Application code, key are mandatory. No store created.'
+            msg: 'Application code and key are mandatory. No store created.'
+        });
+    }
+});
+app.put('/api/db/store', (req, res) => {
+    const uid = req.query.uid || null;
+    const key = req.query.key || null;
+    const values = req.query.data || req.body || null;
+    if (uid && key && values) {
+        (0, db_1.updateStoreKey)(uid, key, values).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            if (error.code == "23503") {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Application code ${uid} unknown. No store updated.`
+                });
+            }
+            else {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Key ${key} for this application code already exists. No store updated.`
+                });
+            }
+        });
+    }
+    else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code and key are mandatory. No store updated.'
+        });
+    }
+});
+app.delete('/api/db/store', (req, res) => {
+    const uid = req.query.uid || null;
+    const key = req.query.key || null;
+    if (uid && key) {
+        (0, db_1.deleteStoreKey)(uid, key).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            if (error.code == "23503") {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `Application code ${uid} unknown. No store deleted.`
+                });
+            }
+            else {
+                res.send({
+                    ts: new Date(),
+                    status: 'error',
+                    code: error.code,
+                    msg: `No store delete.`
+                });
+            }
+        });
+    }
+    else {
+        res.send({
+            ts: new Date(),
+            status: 'error',
+            msg: 'Application code and key are mandatory. No store updated.'
         });
     }
 });
@@ -201,7 +281,7 @@ app.get('/api/db/store/key', (req, res) => {
         res.send({
             ts: new Date(),
             status: 'error',
-            msg: 'Application code, key are mandatory. No store readed.'
+            msg: 'Application code and key are mandatory. No store readed.'
         });
     }
 });
@@ -225,7 +305,7 @@ app.get('/api/db/store/app', (req, res) => {
 // Activate Application server
 const port = 3000;
 app.listen(port, function () {
-    console.log('gsaServe app listening on port ' + port + '!');
+    console.log('gsaServe server listening on port ' + port + '!');
 });
 // Export the Express API
 module.exports = app;

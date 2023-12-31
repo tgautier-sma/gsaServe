@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStore = exports.createApp = exports.getApps = exports.testDb = exports.readDb = void 0;
+exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
 const tools_1 = require("../tools");
 /*
@@ -48,6 +48,12 @@ const getApps = async () => {
     return ret.rows;
 };
 exports.getApps = getApps;
+const getApp = async (app) => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `SELECT * from apps WHERE app=${app}`;
+    return ret.rows;
+};
+exports.getApp = getApp;
 const createApp = async (app, email) => {
     const client = await postgres_1.db.connect();
     const uid = (0, tools_1.genUniqueId)();
@@ -61,12 +67,12 @@ const createApp = async (app, email) => {
 };
 exports.createApp = createApp;
 // Table store
-const getStore = async () => {
+const getStores = async () => {
     const client = await postgres_1.db.connect();
     const ret = await client.sql `SELECT * from store`;
     return ret.rows;
 };
-exports.getStore = getStore;
+exports.getStores = getStores;
 const getStoreKey = async (uid, key) => {
     const client = await postgres_1.db.connect();
     const ret = await client.sql `SELECT * from store WHERE uid=${uid} AND keystore=${key}`;
@@ -91,4 +97,27 @@ const createStoreKey = async (uid, key, value) => {
     }
 };
 exports.createStoreKey = createStoreKey;
+const updateStoreKey = async (uid, key, value) => {
+    const client = await postgres_1.db.connect();
+    const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));
+    const ret = await client.sql `UPDATE public.store SET data=${data} WHERE uid=${uid} AND keystore=${key}`;
+    if (ret.rowCount == 1) {
+        return { api: "updateStoreKey", status: "updated", uid: uid, key: key, data: data };
+    }
+    else {
+        return ret;
+    }
+};
+exports.updateStoreKey = updateStoreKey;
+const deleteStoreKey = async (uid, key) => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `DELETE FROM public.store WHERE uid=${uid} AND keystore=${key}`;
+    if (ret.rowCount == 1) {
+        return { api: "deleteStoreKey", status: "deleted", uid: uid, key: key };
+    }
+    else {
+        return ret;
+    }
+};
+exports.deleteStoreKey = deleteStoreKey;
 //# sourceMappingURL=db.js.map
