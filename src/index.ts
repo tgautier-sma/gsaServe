@@ -160,7 +160,6 @@ app.get('/api/db/app/uid', (req, res) => {
             msg: 'Email and application code is mandatory. No account created.'
         });
     }
-
 });
 app.get('/api/db/app', (req, res) => {
     const app = req.query.app || null;
