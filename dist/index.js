@@ -37,6 +37,26 @@ if (process.env.NODE_ENV !== 'production') {
  */
 const geo_1 = require("./api/geo");
 const db_1 = require("./api/db");
+const user_1 = require("./api/user/user");
+const speakeasy_1 = __importDefault(require("speakeasy"));
+const qrcode_1 = __importDefault(require("qrcode"));
+const requireToken = (req, res, next) => {
+    const { token } = req.body;
+    // Find the user with the given email address
+    const user = user_1.users.find(u => u.email === req.user.email);
+    // Verify the user's token
+    const verified = speakeasy_1.default.totp.verify({
+        secret: user.secret,
+        encoding: 'base32',
+        token,
+        window: 1
+    });
+    if (!verified) {
+        return res.status(401).send('Invalid token');
+    }
+    // Token is valid, proceed to the next middleware or route handler
+    next();
+};
 /**
  * Configure server application
  */
@@ -75,6 +95,57 @@ app.post('/api/event', (req, res) => {
         params: req.params,
         body: req.body
     });
+});
+/**
+ * API for user managment
+ */
+app.post('/api/register', (req, res) => {
+    const { name, email, password } = req.body;
+    // Generate a new secret key for the user
+    const secret = speakeasy_1.default.generateSecret({ length: 20 });
+    // Save the user data in the database
+    const user = new user_1.User(user_1.users.length + 1, name, email, password, secret.base32);
+    user_1.users.push(user);
+    // Generate a QR code for the user to scan
+    var url = speakeasy_1.default.otpauthURL({ secret: secret.ascii, label: 'gsaServe', algorithm: 'sha512' });
+    qrcode_1.default.toDataURL(url, (err, image_data) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error creating qrCode');
+        }
+        // Send the QR code to the user
+        res.send({ qrCode: image_data });
+    });
+});
+app.post('/login', (req, res) => {
+    const { email, password, token } = req.body;
+    console.log(req.body);
+    // Find the user with the given email address
+    const user = user_1.users.find(u => u.email === email);
+    console.log("USER FOUNDED", user);
+    // Validate the user's credentials
+    if (!user || user.password !== password) {
+        return res.status(401).send('Invalid credentials');
+    }
+    // Verify the user's token
+    const verified = speakeasy_1.default.totp.verify({
+        secret: user.secret,
+        encoding: 'base32',
+        token,
+        window: 1
+    });
+    if (!verified) {
+        return res.status(401).send('Invalid token');
+    }
+    // User is authenticated
+    res.send('Login successful');
+});
+app.post('/protected', requireToken, (req, res) => {
+    // This route handler will only be called if the user's token is valid
+    res.send('Protected resource accessed successfully');
+});
+app.get('/users', (req, res) => {
+    res.send(user_1.users);
 });
 /**
  * API for GeoPortail access
