@@ -35,33 +35,36 @@ if (process.env.NODE_ENV !== 'production') {
  */
 import { getGeoConfig } from "./api/geo";
 import {
-    readDb, testDb, 
-    getApps, createApp, getApp, 
+    readDb, testDb,
+    getApps, createApp, getApp,
     getStores,
     createStoreKey, updateStoreKey, deleteStoreKey,
     getStoreKey, getStoreApp
 } from "./api/db";
 import { users, User } from './api/user/user';
+import { authenticator } from 'otplib';
 import speakeasy from 'speakeasy';
+import jwt from 'jsonwebtoken';
+import expressJWT from 'express-jwt';
 import QRCode from 'qrcode';
 
-const requireToken = (req:any, res:any, next:any) => {
+const requireToken = (req: any, res: any, next: any) => {
     const { token } = req.body;
     // Find the user with the given email address
     const user = users.find(u => u.email === req.user.email);
     // Verify the user's token
     const verified = speakeasy.totp.verify({
-      secret: user.secret,
-      encoding: 'base32',
-      token,
-      window: 1
+        secret: user.secret,
+        encoding: 'base32',
+        token,
+        window: 1
     });
     if (!verified) {
-      return res.status(401).send('Invalid token');
+        return res.status(401).send('Invalid token');
     }
     // Token is valid, proceed to the next middleware or route handler
     next();
-  }
+}
 
 
 /**
@@ -115,51 +118,48 @@ app.post('/api/event', (req, res) => {
 app.post('/api/register', (req, res) => {
     const { name, email, password } = req.body;
     // Generate a new secret key for the user
-    const secret = speakeasy.generateSecret({ length: 20 });
+    const secret = authenticator.generateSecret();
     // Save the user data in the database
-    const user = new User(users.length + 1, name, email, password, secret.base32);
+    const user = new User(users.length + 1, name, email, password, secret);
     users.push(user);
     // Generate a QR code for the user to scan
-    var url = speakeasy.otpauthURL({ secret: secret.ascii, label: 'gsaServe', algorithm: 'sha512' });
+    var url = authenticator.keyuri(email, '2FA Node App', secret);
     QRCode.toDataURL(url, (err: any, image_data: any) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Error creating qrCode');
-      }
-      // Send the QR code to the user
-      res.send({ qrCode: image_data });
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error creating qrCode');
+        }
+        // Send the QR code to the user
+        res.send({
+            email: email,
+            qrCode: image_data
+        });
     });
-  });
-  app.post('/login', (req, res) => {
+});
+
+app.post('/login', (req, res) => {
     const { email, password, token } = req.body;
-    console.log(req.body);
     // Find the user with the given email address
     const user = users.find(u => u.email === email);
-    console.log("USER FOUNDED",user);
     // Validate the user's credentials
     if (!user || user.password !== password) {
-      return res.status(401).send('Invalid credentials');
+        return res.status(401).send({ message: 'Invalid credentials' });
     }
     // Verify the user's token
-    const verified = speakeasy.totp.verify({
-      secret: user.secret,
-      encoding: 'base32',
-      token,
-      window: 1
-    });
+    const verified = authenticator.check(token, user.secret)
     if (!verified) {
-      return res.status(401).send('Invalid token');
+        return res.status(401).send({ message: "Invalid token" });
     }
     // User is authenticated
-    res.send('Login successful');
-  });
-  app.post('/protected', requireToken, (req, res) => {
+    res.send({ message: "Login successful", token: jwt.sign(email, 'supersecret') });
+});
+app.post('/protected', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid
     res.send('Protected resource accessed successfully');
-  });
-  app.get('/users', (req, res) => {
+});
+app.get('/users', (req, res) => {
     res.send(users);
-  });
+});
 
 /**
  * API for GeoPortail access
