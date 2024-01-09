@@ -107,36 +107,51 @@ app.post('/api/register', (req, res) => {
     const secret = otplib_1.authenticator.generateSecret();
     // Save the user data in the database
     const user = new user_1.User(user_1.users.length + 1, name, email, password, secret);
-    user_1.users.push(user);
-    // Generate a QR code for the user to scan
-    var url = otplib_1.authenticator.keyuri(email, '2FA Node App', secret);
-    qrcode_1.default.toDataURL(url, (err, image_data) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error creating qrCode');
-        }
-        // Send the QR code to the user
-        res.send({
-            email: email,
-            qrCode: image_data
+    (0, db_1.createAuth)(name, email, password, secret).then((data) => {
+        user_1.users.push(user);
+        // Generate a QR code for the user to scan
+        var url = otplib_1.authenticator.keyuri(email, '2FA Node App', secret);
+        qrcode_1.default.toDataURL(url, (err, image_data) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Error creating qrCode');
+            }
+            // Send the QR code to the user
+            res.send({
+                email: email,
+                qrCode: image_data
+            });
         });
+    }).catch((error) => {
+        res.send(error);
     });
 });
 app.post('/login', (req, res) => {
     const { email, password, token } = req.body;
     // Find the user with the given email address
-    const user = user_1.users.find(u => u.email === email);
-    // Validate the user's credentials
-    if (!user || user.password !== password) {
+    (0, db_1.getAuth)(email).then(data => {
+        console.log("DB:", data);
+        if (data.rowCount === 1) {
+            const user = data.rows[0];
+            console.log("USER:", user);
+            // Validate the user's credentials
+            if (!user || user.password !== password) {
+                return res.status(401).send({ message: 'Invalid credentials' });
+            }
+            // Verify the user's token
+            const verified = otplib_1.authenticator.check(token, user.secret);
+            if (!verified) {
+                return res.status(401).send({ message: "Invalid token" });
+            }
+            // User is authenticated
+            res.send({ message: "Login successful", token: jsonwebtoken_1.default.sign(email, 'supersecret') });
+        }
+        else {
+            return res.status(401).send({ message: 'Invalid credentials' });
+        }
+    }).catch(error => {
         return res.status(401).send({ message: 'Invalid credentials' });
-    }
-    // Verify the user's token
-    const verified = otplib_1.authenticator.check(token, user.secret);
-    if (!verified) {
-        return res.status(401).send({ message: "Invalid token" });
-    }
-    // User is authenticated
-    res.send({ message: "Login successful", token: jsonwebtoken_1.default.sign(email, 'supersecret') });
+    });
 });
 app.post('/protected', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid

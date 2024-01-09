@@ -39,6 +39,7 @@ import {
     getApps, createApp, getApp,
     getStores,
     createStoreKey, updateStoreKey, deleteStoreKey,
+    createAuth, getAuth, updateAuth, deleteAuth,
     getStoreKey, getStoreApp
 } from "./api/db";
 import { users, User } from './api/user/user';
@@ -121,37 +122,52 @@ app.post('/api/register', (req, res) => {
     const secret = authenticator.generateSecret();
     // Save the user data in the database
     const user = new User(users.length + 1, name, email, password, secret);
-    users.push(user);
-    // Generate a QR code for the user to scan
-    var url = authenticator.keyuri(email, '2FA Node App', secret);
-    QRCode.toDataURL(url, (err: any, image_data: any) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error creating qrCode');
-        }
-        // Send the QR code to the user
-        res.send({
-            email: email,
-            qrCode: image_data
+    createAuth(name, email, password, secret).then((data: any) => {
+        users.push(user);
+        // Generate a QR code for the user to scan
+        var url = authenticator.keyuri(email, '2FA Node App', secret);
+        QRCode.toDataURL(url, (err: any, image_data: any) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Error creating qrCode');
+            }
+            // Send the QR code to the user
+            res.send({
+                email: email,
+                qrCode: image_data
+            });
         });
+    }).catch((error: any) => {
+        res.send(error);
     });
+
 });
 
 app.post('/login', (req, res) => {
     const { email, password, token } = req.body;
     // Find the user with the given email address
-    const user = users.find(u => u.email === email);
-    // Validate the user's credentials
-    if (!user || user.password !== password) {
+    getAuth(email).then(data => {
+        console.log("DB:", data);
+        if (data.rowCount === 1) {
+            const user = data.rows[0];
+            console.log("USER:",user);
+            // Validate the user's credentials
+            if (!user || user.password !== password) {
+                return res.status(401).send({ message: 'Invalid credentials' });
+            }
+            // Verify the user's token
+            const verified = authenticator.check(token, user.secret)
+            if (!verified) {
+                return res.status(401).send({ message: "Invalid token" });
+            }
+            // User is authenticated
+            res.send({ message: "Login successful", token: jwt.sign(email, 'supersecret') });
+        } else {
+            return res.status(401).send({ message: 'Invalid credentials' });
+        }
+    }).catch(error => {
         return res.status(401).send({ message: 'Invalid credentials' });
-    }
-    // Verify the user's token
-    const verified = authenticator.check(token, user.secret)
-    if (!verified) {
-        return res.status(401).send({ message: "Invalid token" });
-    }
-    // User is authenticated
-    res.send({ message: "Login successful", token: jwt.sign(email, 'supersecret') });
+    });
 });
 app.post('/protected', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid

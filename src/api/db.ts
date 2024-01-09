@@ -46,7 +46,7 @@ export const getApps = async () => {
     const ret = await client.sql`SELECT * from apps`;
     return ret.rows;
 }
-export const getApp = async (app:any) => {
+export const getApp = async (app: any) => {
     const client = await db.connect();
     const ret = await client.sql`SELECT * from apps WHERE app=${app}`;
     return ret.rows;
@@ -103,6 +103,42 @@ export const deleteStoreKey = async (uid: any, key: any) => {
     const ret = await client.sql`DELETE FROM public.store WHERE uid=${uid} AND keystore=${key}`;
     if (ret.rowCount == 1) {
         return { api: "deleteStoreKey", status: "deleted", uid: uid, key: key }
+    } else {
+        return ret;
+    }
+}
+
+
+// Table auth
+export const createAuth = async (name: any, email: any, password: any, secret: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`INSERT INTO public.auth (name,email,password,secret) VALUES (${name},${email},${password},${secret})`;
+    if (ret.rowCount == 1) {
+        return { api: "createAuth", status: "created", uid: 'aa' }
+    } else {
+        return ret;
+    }
+}
+export const getAuth = async (email: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from public.auth where email=${email}`;
+    return ret;
+}
+export const updateAuth = async (uid: any, key: any, value: any) => {
+    const client = await db.connect();
+    const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));
+    const ret = await client.sql`UPDATE public.store SET data=${data} WHERE uid=${uid} AND keystore=${key}`;
+    if (ret.rowCount == 1) {
+        return { api: "updateStoreKey", status: "updated", uid: uid, key: key, data: data }
+    } else {
+        return ret;
+    }
+}
+export const deleteAuth = async (id: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`DELETE FROM public.auth WHERE id=${id}`;
+    if (ret.rowCount == 1) {
+        return { api: "deleteAuth", status: "deleted", id: id }
     } else {
         return ret;
     }

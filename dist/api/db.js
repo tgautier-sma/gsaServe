@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
+exports.deleteAuth = exports.updateAuth = exports.getAuth = exports.createAuth = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
 const tools_1 = require("../tools");
 /*
@@ -120,4 +120,45 @@ const deleteStoreKey = async (uid, key) => {
     }
 };
 exports.deleteStoreKey = deleteStoreKey;
+// Table auth
+const createAuth = async (name, email, password, secret) => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `INSERT INTO public.auth (name,email,password,secret) VALUES (${name},${email},${password},${secret})`;
+    if (ret.rowCount == 1) {
+        return { api: "createAuth", status: "created", uid: 'aa' };
+    }
+    else {
+        return ret;
+    }
+};
+exports.createAuth = createAuth;
+const getAuth = async (email) => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `SELECT * from public.auth where email=${email}`;
+    return ret;
+};
+exports.getAuth = getAuth;
+const updateAuth = async (uid, key, value) => {
+    const client = await postgres_1.db.connect();
+    const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));
+    const ret = await client.sql `UPDATE public.store SET data=${data} WHERE uid=${uid} AND keystore=${key}`;
+    if (ret.rowCount == 1) {
+        return { api: "updateStoreKey", status: "updated", uid: uid, key: key, data: data };
+    }
+    else {
+        return ret;
+    }
+};
+exports.updateAuth = updateAuth;
+const deleteAuth = async (id) => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `DELETE FROM public.auth WHERE id=${id}`;
+    if (ret.rowCount == 1) {
+        return { api: "deleteAuth", status: "deleted", id: id };
+    }
+    else {
+        return ret;
+    }
+};
+exports.deleteAuth = deleteAuth;
 //# sourceMappingURL=db.js.map
