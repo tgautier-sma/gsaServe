@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
-const tools_1 = require("../tools");
+const tools_1 = require("../../tools");
 /*
 import { createKysely } from "@vercel/postgres-kysely";
 const myDb = createKysely();
@@ -172,4 +172,4 @@ const deleteAuth = async (id) => {
     }
 };
 exports.deleteAuth = deleteAuth;
-//# sourceMappingURL=db.js.map
+//# sourceMappingURL=controller.js.map

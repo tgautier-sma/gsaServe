@@ -1,7 +1,7 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, db } from "@vercel/postgres";
-import { genUniqueId } from '../tools';
+import { genUniqueId } from '../../tools';
 
 /* 
 import { createKysely } from "@vercel/postgres-kysely";
@@ -34,7 +34,6 @@ export const readDb = async (db: string, id: any, email: any, page: string, page
         return { totalCount: count.rows[0].count, page: page, pageSize: pageSize, rows: rows };
     }
 }
-
 export const testDb = async () => {
     const client = await db.connect();
     const ret = await client.sql`SELECT 1`;
@@ -128,12 +127,11 @@ export const checkAuth = async (email: any) => {
     const client = await db.connect();
     const ret = await client.sql`SELECT * from public.auth where email=${email}`;
     if (ret.rowCount === 1) {
-        return {rowCount: ret.rowCount, data:ret.rows[0]};
+        return { rowCount: ret.rowCount, data: ret.rows[0] };
     } else {
         return { rowCount: ret.rowCount };
     }
 }
-
 export const updateAuth = async (uid: any, key: any, value: any) => {
     const client = await db.connect();
     const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));
