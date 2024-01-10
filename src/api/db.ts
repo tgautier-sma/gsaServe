@@ -124,6 +124,16 @@ export const getAuth = async (email: any) => {
     const ret = await client.sql`SELECT * from public.auth where email=${email}`;
     return ret;
 }
+export const checkAuth = async (email: any) => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from public.auth where email=${email}`;
+    if (ret.rowCount === 1) {
+        return {rowCount: ret.rowCount, data:ret.rows[0]};
+    } else {
+        return { rowCount: ret.rowCount };
+    }
+}
+
 export const updateAuth = async (uid: any, key: any, value: any) => {
     const client = await db.connect();
     const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));

@@ -39,7 +39,7 @@ import {
     getApps, createApp, getApp,
     getStores,
     createStoreKey, updateStoreKey, deleteStoreKey,
-    createAuth, getAuth, updateAuth, deleteAuth,
+    createAuth, getAuth, checkAuth, updateAuth, deleteAuth,
     getStoreKey, getStoreApp
 } from "./api/db";
 import { users, User } from './api/user/user';
@@ -122,25 +122,34 @@ app.post('/api/register', (req, res) => {
     const secret = authenticator.generateSecret();
     // Save the user data in the database
     const user = new User(users.length + 1, name, email, password, secret);
-    createAuth(name, email, password, secret).then((data: any) => {
-        users.push(user);
-        // Generate a QR code for the user to scan
-        var url = authenticator.keyuri(email, '2FA Node App', secret);
-        QRCode.toDataURL(url, (err: any, image_data: any) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Error creating qrCode');
-            }
-            // Send the QR code to the user
-            res.send({
-                email: email,
-                qrCode: image_data
+    checkAuth(email).then(response => {
+        if (response.rowCount === 0) {
+            // Create the new account
+            createAuth(name, email, password, secret).then((data: any) => {
+                users.push(user);
+                // Generate a QR code for the user to scan
+                var url = authenticator.keyuri(email, '2FA Node App', secret);
+                QRCode.toDataURL(url, (err: any, image_data: any) => {
+                    if (err) {
+                        console.error(err);
+                        return res.send({ status: "error", message: 'Error creating qrCode',data:err });
+                    }
+                    // Send the QR code to the user
+                    res.send({
+                        status:"ok",
+                        email: email,
+                        qrCode: image_data
+                    });
+                });
+            }).catch((error: any) => {
+                return res.send({ status: "error", message: 'Technical error',data:error });
             });
-        });
-    }).catch((error: any) => {
-        res.send(error);
+        } else {
+            return res.send({ status: "error", message: 'Register not authorized',data:null });
+        }
+    }).catch(error => {
+        return res.send({ status: "error", message: 'Technical error',data:error });
     });
-
 });
 
 app.post('/login', (req, res) => {
@@ -150,7 +159,7 @@ app.post('/login', (req, res) => {
         console.log("DB:", data);
         if (data.rowCount === 1) {
             const user = data.rows[0];
-            console.log("USER:",user);
+            console.log("USER:", user);
             // Validate the user's credentials
             if (!user || user.password !== password) {
                 return res.status(401).send({ message: 'Invalid credentials' });
@@ -172,6 +181,18 @@ app.post('/login', (req, res) => {
 app.post('/protected', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid
     res.send('Protected resource accessed successfully');
+});
+app.get('/user', (req, res) => {
+    const email = req.query.email || null;
+    if (email) {
+        checkAuth(email).then(response => {
+            return res.send(response);
+        }).catch(error => {
+            return res.send(error);
+        })
+    } else {
+        return res.status(401).send({ message: 'Missing parameter' });
+    }
 });
 app.get('/users', (req, res) => {
     res.send(users);
@@ -258,6 +279,7 @@ app.get('/api/db/app', (req, res) => {
         res.send(error);
     });
 });
+
 /**
  * API for store json database
  */

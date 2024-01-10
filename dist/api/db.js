@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAuth = exports.updateAuth = exports.getAuth = exports.createAuth = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
+exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
 const tools_1 = require("../tools");
 /*
@@ -138,6 +138,17 @@ const getAuth = async (email) => {
     return ret;
 };
 exports.getAuth = getAuth;
+const checkAuth = async (email) => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `SELECT * from public.auth where email=${email}`;
+    if (ret.rowCount === 1) {
+        return { rowCount: ret.rowCount, data: ret.rows[0] };
+    }
+    else {
+        return { rowCount: ret.rowCount };
+    }
+};
+exports.checkAuth = checkAuth;
 const updateAuth = async (uid, key, value) => {
     const client = await postgres_1.db.connect();
     const data = (typeof value === "string" ? JSON.stringify({ data: value }) : JSON.stringify(value));

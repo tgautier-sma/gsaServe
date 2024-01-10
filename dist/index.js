@@ -107,23 +107,34 @@ app.post('/api/register', (req, res) => {
     const secret = otplib_1.authenticator.generateSecret();
     // Save the user data in the database
     const user = new user_1.User(user_1.users.length + 1, name, email, password, secret);
-    (0, db_1.createAuth)(name, email, password, secret).then((data) => {
-        user_1.users.push(user);
-        // Generate a QR code for the user to scan
-        var url = otplib_1.authenticator.keyuri(email, '2FA Node App', secret);
-        qrcode_1.default.toDataURL(url, (err, image_data) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Error creating qrCode');
-            }
-            // Send the QR code to the user
-            res.send({
-                email: email,
-                qrCode: image_data
+    (0, db_1.checkAuth)(email).then(response => {
+        if (response.rowCount === 0) {
+            // Create the new account
+            (0, db_1.createAuth)(name, email, password, secret).then((data) => {
+                user_1.users.push(user);
+                // Generate a QR code for the user to scan
+                var url = otplib_1.authenticator.keyuri(email, '2FA Node App', secret);
+                qrcode_1.default.toDataURL(url, (err, image_data) => {
+                    if (err) {
+                        console.error(err);
+                        return res.send({ status: "error", message: 'Error creating qrCode', data: err });
+                    }
+                    // Send the QR code to the user
+                    res.send({
+                        status: "ok",
+                        email: email,
+                        qrCode: image_data
+                    });
+                });
+            }).catch((error) => {
+                return res.send({ status: "error", message: 'Technical error', data: error });
             });
-        });
-    }).catch((error) => {
-        res.send(error);
+        }
+        else {
+            return res.send({ status: "error", message: 'Register not authorized', data: null });
+        }
+    }).catch(error => {
+        return res.send({ status: "error", message: 'Technical error', data: error });
     });
 });
 app.post('/login', (req, res) => {
@@ -156,6 +167,19 @@ app.post('/login', (req, res) => {
 app.post('/protected', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid
     res.send('Protected resource accessed successfully');
+});
+app.get('/user', (req, res) => {
+    const email = req.query.email || null;
+    if (email) {
+        (0, db_1.checkAuth)(email).then(response => {
+            return res.send(response);
+        }).catch(error => {
+            return res.send(error);
+        });
+    }
+    else {
+        return res.status(401).send({ message: 'Missing parameter' });
+    }
 });
 app.get('/users', (req, res) => {
     res.send(user_1.users);
