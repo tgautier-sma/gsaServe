@@ -74,28 +74,39 @@ router.post('/register', (req: any, res: any) => {
 });
 router.post('/login', (req: any, res: any) => {
     const { email, password, token } = req.body;
+    // console.log(req.body);
     // Find the user with the given email address
     getAuth(email).then(data => {
-        console.log("DB:", data);
+        // console.log("DB:", data);
         if (data.rowCount === 1) {
             const user = data.rows[0];
-            console.log("USER:", user);
+            // console.log("USER:", user);
             // Validate the user's credentials
             if (!user || user.password !== password) {
-                return res.status(401).send({ message: 'Invalid credentials' });
+                return res.status(401).send({ status: "error",message: 'Invalid credentials' });
             }
             // Verify the user's token
-            const verified = authenticator.check(token, user.secret)
-            if (!verified) {
-                return res.status(401).send({ message: "Invalid token" });
+            try {
+                const secret = user.secret;
+                // const token = authenticator.generate(secret);
+                const verified = authenticator.verify({ token, secret });
+                if (!verified) {
+                    return res.status(401).send({ status: "error", message: "Invalid token" });
+                }
+                // User is authenticated
+                return res.send({ status: "ok", message: "Login successful", token: jwt.sign(email, 'supersecret') });
+            } catch (err) {
+                // Possible errors
+                // - options validation
+                // - "Invalid input - it is not base32 encoded string" (if thiry-two is used)
+                console.error(err);
+                return res.status(401).send({ status: "error", message: "Invalid token" });
             }
-            // User is authenticated
-            res.send({ message: "Login successful", token: jwt.sign(email, 'supersecret') });
         } else {
-            return res.status(401).send({ message: 'Invalid credentials' });
+            return res.status(401).send({ status: "error", message: 'Invalid credentials' });
         }
     }).catch(error => {
-        return res.status(401).send({ message: 'Invalid credentials' });
+        return res.status(401).send({ status: "error", message: 'Invalid credentials' });
     });
 });
 router.post('/protected', requireToken, (req: any, res: any) => {
