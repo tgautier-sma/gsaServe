@@ -4,32 +4,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const otplib_1 = require("otplib");
-const speakeasy_1 = __importDefault(require("speakeasy"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const qrcode_1 = __importDefault(require("qrcode"));
 const controller_1 = require("../db/controller");
 const user_1 = require("../user/user");
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
+const appSecret = 'supersecret';
+const jwtExpire = "7d";
+var dateFormat = new Intl.DateTimeFormat('fr-FR', {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: false,
+});
+//var usedOptions = dateFormat.resolvedOptions();
 /**
  * Common functions
  */
 const requireToken = (req, res, next) => {
     const { token } = req.body;
-    // Find the user with the given email address
-    const user = user_1.users.find(u => u.email === req.user.email);
-    // Verify the user's token
-    const verified = speakeasy_1.default.totp.verify({
-        secret: user.secret,
-        encoding: 'base32',
-        token,
-        window: 1
+    jsonwebtoken_1.default.verify(token, appSecret, (err, decoded) => {
+        if (err) {
+            return res.status(401).send({ message: 'Invalid token' });
+        }
+        else {
+            // Token is valid, proceed to the next middleware or route handler
+            // console.log(decoded)
+            next();
+        }
     });
-    if (!verified) {
-        return res.status(401).send('Invalid token');
-    }
-    // Token is valid, proceed to the next middleware or route handler
-    next();
 };
 /**
  * API for user managment
@@ -39,15 +46,12 @@ router.get('/', (req, res) => {
 });
 router.post('/register', (req, res) => {
     const { name, email, password } = req.body;
-    // Generate a new secret key for the user
-    const secret = otplib_1.authenticator.generateSecret();
-    // Save the user data in the database
-    const user = new user_1.User(user_1.users.length + 1, name, email, password, secret);
     (0, controller_1.checkAuth)(email).then(response => {
         if (response.rowCount === 0) {
+            // Generate a new secret key for the user
+            const secret = otplib_1.authenticator.generateSecret();
             // Create the new account
             (0, controller_1.createAuth)(name, email, password, secret).then((data) => {
-                user_1.users.push(user);
                 // Generate a QR code for the user to scan
                 var url = otplib_1.authenticator.keyuri(email, '2FA Node App', secret);
                 qrcode_1.default.toDataURL(url, (err, image_data) => {
@@ -95,7 +99,8 @@ router.post('/login', (req, res) => {
                     return res.status(401).send({ status: "error", message: "Invalid token" });
                 }
                 // User is authenticated
-                return res.send({ status: "ok", message: "Login successful", token: jsonwebtoken_1.default.sign(email, 'supersecret') });
+                const jwToken = jsonwebtoken_1.default.sign({ email: email, userName: user.name }, appSecret, { expiresIn: jwtExpire });
+                return res.send({ status: "ok", message: "Login successful", token: jwToken });
             }
             catch (err) {
                 // Possible errors
@@ -112,10 +117,6 @@ router.post('/login', (req, res) => {
         return res.status(401).send({ status: "error", message: 'Invalid credentials' });
     });
 });
-router.post('/protected', requireToken, (req, res) => {
-    // This route handler will only be called if the user's token is valid
-    res.send('Protected resource accessed successfully');
-});
 router.get('/user', (req, res) => {
     const email = req.query.email || null;
     if (email) {
@@ -131,6 +132,33 @@ router.get('/user', (req, res) => {
 });
 router.get('/users', (req, res) => {
     res.send(user_1.users);
+});
+/**
+ * Protected Routes
+ */
+router.post('/protected', requireToken, (req, res) => {
+    // This route handler will only be called if the user's token is valid
+    res.send('Protected resource accessed successfully');
+});
+router.get('/check', requireToken, (req, res) => {
+    // This route handler will only be called if the user's token is valid
+    const { token } = req.body;
+    jsonwebtoken_1.default.verify(token, appSecret, (err, decoded) => {
+        if (err) {
+            res.status(401).send({ message: 'Invalid token', data: err });
+        }
+        else {
+            // Token is valid, proceed to the next middleware or route handler
+            console.log(decoded); // bar
+            (0, controller_1.checkAuth)(decoded.email).then(response => {
+                decoded['id'] = response.data.id;
+                decoded['expireAt'] = dateFormat.format(new Date(decoded.exp * 1000));
+                res.send(decoded);
+            }).catch(error => {
+                res.status(401).send({ message: 'Invalid credential' });
+            });
+        }
+    });
 });
 module.exports = router;
 //# sourceMappingURL=router.js.map
