@@ -140,7 +140,7 @@ router.post('/protected', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid
     res.send('Protected resource accessed successfully');
 });
-router.get('/check', requireToken, (req, res) => {
+router.post('/check', requireToken, (req, res) => {
     // This route handler will only be called if the user's token is valid
     const { token } = req.body;
     jsonwebtoken_1.default.verify(token, appSecret, (err, decoded) => {
