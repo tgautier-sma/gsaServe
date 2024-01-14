@@ -149,7 +149,7 @@ router.post('/check', requireToken, (req: any, res: any) => {
             res.status(401).send({ message: 'Invalid token', data:err });
         } else {
             // Token is valid, proceed to the next middleware or route handler
-            console.log(decoded) // bar
+            // console.log(decoded) // bar
             checkAuth(decoded.email).then(response => {
                 decoded['id']=response.data.id;
                 decoded['expireAt']=dateFormat.format(new Date(decoded.exp* 1000));

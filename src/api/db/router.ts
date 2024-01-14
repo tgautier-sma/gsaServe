@@ -1,5 +1,7 @@
 import express from "express";
+import jwt from 'jsonwebtoken';
 const router = express.Router();
+const appSecret = 'supersecret';
 import {
     readDb, testDb,
     getApps, createApp, getApp,
@@ -7,7 +9,26 @@ import {
     getStoreKey, getStoreApp
 } from "./controller";
 
-router.get('/', (req, res) => {
+const requireToken = (req: any, res: any, next: any) => {
+    const authHeader = String(req.headers['authorization'] || '');
+    if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7, authHeader.length);
+        jwt.verify(token, appSecret, function(err, decoded) {
+            if (err) {
+                console.log("ERR",err);
+                return res.status(401).send({ message: 'Invalid token' });
+            } else {
+                console.log(decoded) // bar
+                next()
+            }
+          });
+    } else {
+        console.log("No autorization");
+        next();
+    }
+}
+
+router.get('/',requireToken, (req, res) => {
     res.send("👍 Server db working well!");
 })
 /**

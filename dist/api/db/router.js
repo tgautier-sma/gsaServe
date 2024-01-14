@@ -4,9 +4,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = express_1.default.Router();
+const appSecret = 'supersecret';
 const controller_1 = require("./controller");
-router.get('/', (req, res) => {
+const requireToken = (req, res, next) => {
+    const authHeader = String(req.headers['authorization'] || '');
+    if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7, authHeader.length);
+        jsonwebtoken_1.default.verify(token, appSecret, function (err, decoded) {
+            if (err) {
+                console.log("ERR", err);
+                return res.status(401).send({ message: 'Invalid token' });
+            }
+            else {
+                console.log(decoded); // bar
+                next();
+            }
+        });
+    }
+    else {
+        console.log("No autorization");
+        next();
+    }
+};
+router.get('/', requireToken, (req, res) => {
     res.send("👍 Server db working well!");
 });
 /**

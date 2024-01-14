@@ -3,6 +3,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, db } from "@vercel/postgres";
 import { genUniqueId } from '../../tools';
 
+
 /* 
 import { createKysely } from "@vercel/postgres-kysely";
 const myDb = createKysely();
@@ -14,7 +15,6 @@ const directConnectionString = postgresConnectionString('direct');
 console.log("Pool",pooledConnectionString);
 console.log("Direct",directConnectionString); 
 */
-
 
 export const readDb = async (db: string, id: any, email: any, page: string, pageSize: string) => {
     const offset = (+page - 1) * +pageSize;

@@ -149,7 +149,7 @@ router.post('/check', requireToken, (req, res) => {
         }
         else {
             // Token is valid, proceed to the next middleware or route handler
-            console.log(decoded); // bar
+            // console.log(decoded) // bar
             (0, controller_1.checkAuth)(decoded.email).then(response => {
                 decoded['id'] = response.data.id;
                 decoded['expireAt'] = dateFormat.format(new Date(decoded.exp * 1000));
