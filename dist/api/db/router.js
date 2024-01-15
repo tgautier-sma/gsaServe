@@ -4,31 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const request_1 = require("../../request");
 const router = express_1.default.Router();
 const appSecret = 'supersecret';
 const controller_1 = require("./controller");
-const requireToken = (req, res, next) => {
-    const authHeader = String(req.headers['authorization'] || '');
-    if (authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7, authHeader.length);
-        jsonwebtoken_1.default.verify(token, appSecret, function (err, decoded) {
-            if (err) {
-                console.log("ERR", err);
-                return res.status(401).send({ message: 'Invalid token' });
-            }
-            else {
-                console.log(decoded); // bar
-                next();
-            }
-        });
-    }
-    else {
-        console.log("No autorization");
-        next();
-    }
-};
-router.get('/', requireToken, (req, res) => {
+router.get('/', request_1.requireToken, (req, res) => {
     res.send("👍 Server db working well!");
 });
 /**
@@ -50,7 +30,7 @@ router.get('/query', (req, res) => {
         res.send(error);
     });
 });
-router.get('/test', (req, res) => {
+router.get('/test', request_1.requireToken, (req, res) => {
     console.log("Test DB");
     (0, controller_1.testDb)().then((data) => {
         res.send(data);
@@ -61,14 +41,14 @@ router.get('/test', (req, res) => {
 /**
  * Api for apps request
  */
-router.get('/apps', (req, res) => {
+router.get('/apps', request_1.requireToken, (req, res) => {
     (0, controller_1.getApps)().then((data) => {
         res.send(data);
     }).catch((error) => {
         res.send(error);
     });
 });
-router.get('/app/uid', (req, res) => {
+router.get('/app/uid', request_1.requireToken, (req, res) => {
     const email = req.query.email || null;
     const app = req.query.app || null;
     if (email && app) {

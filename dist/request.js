@@ -3,12 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.get = void 0;
+exports.requireToken = exports.get = void 0;
 const axios_1 = __importDefault(require("axios"));
 const tunnel_1 = __importDefault(require("tunnel"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 let isProxy = (process.env.useProxy ? process.env.useProxy : 'false');
 let axiosProxy;
 setRequester(isProxy);
+const appSecret = 'supersecret';
 const get = async (url) => {
     console.log("(r) Get Request");
     return new Promise((resolve, reject) => {
@@ -24,6 +26,33 @@ const get = async (url) => {
     });
 };
 exports.get = get;
+// Check token before execute the request
+const requireToken = (req, res, next) => {
+    const authHeader = String(req.headers['authorization'] || '');
+    if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7, authHeader.length);
+        jsonwebtoken_1.default.verify(token, appSecret, (err, decoded) => {
+            if (err) {
+                console.log("ERR", err.message);
+                return res.status(401).send({ message: err.message });
+            }
+            else {
+                // console.log("JWT=", decoded)
+                if (Date.now() > decoded.exp * 1000) {
+                    return res.status(401).send({ message: 'Token expired' });
+                }
+                else {
+                    next();
+                }
+            }
+        });
+    }
+    else {
+        console.log("No autorization");
+        next();
+    }
+};
+exports.requireToken = requireToken;
 /** ======================================================================
  * Common Functions
  * =======================================================================

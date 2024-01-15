@@ -1,8 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import tunnel from 'tunnel';
+import jwt, { JwtPayload, VerifyErrors, verify } from 'jsonwebtoken';
 let isProxy = (process.env.useProxy ? process.env.useProxy : 'false');
 let axiosProxy: AxiosInstance;
 setRequester(isProxy);
+const appSecret = 'supersecret';
 
 export const get = async (url: string) => {
     console.log("(r) Get Request");
@@ -18,7 +20,29 @@ export const get = async (url: string) => {
             .finally(() => { });
     })
 }
-
+// Check token before execute the request
+export const requireToken = (req: any, res: any, next: any) => {
+    const authHeader = String(req.headers['authorization'] || '');
+    if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7, authHeader.length);
+        jwt.verify(token, appSecret, (err:VerifyErrors, decoded: JwtPayload) => {
+            if (err) {
+                console.log("ERR", err.message);
+                return res.status(401).send({ message: err.message });
+            } else {
+                // console.log("JWT=", decoded)
+                if (Date.now() > decoded.exp * 1000) {
+                    return res.status(401).send({ message: 'Token expired' });
+                } else {
+                    next()
+                }
+            }
+        });
+    } else {
+        console.log("No autorization");
+        next();
+    }
+}
 
 /** ======================================================================
  * Common Functions

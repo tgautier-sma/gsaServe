@@ -1,5 +1,6 @@
 import express from "express";
-import jwt from 'jsonwebtoken';
+import { requireToken } from "../../request";
+
 const router = express.Router();
 const appSecret = 'supersecret';
 import {
@@ -9,26 +10,9 @@ import {
     getStoreKey, getStoreApp
 } from "./controller";
 
-const requireToken = (req: any, res: any, next: any) => {
-    const authHeader = String(req.headers['authorization'] || '');
-    if (authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7, authHeader.length);
-        jwt.verify(token, appSecret, function(err, decoded) {
-            if (err) {
-                console.log("ERR",err);
-                return res.status(401).send({ message: 'Invalid token' });
-            } else {
-                console.log(decoded) // bar
-                next()
-            }
-          });
-    } else {
-        console.log("No autorization");
-        next();
-    }
-}
 
-router.get('/',requireToken, (req, res) => {
+
+router.get('/', requireToken, (req, res) => {
     res.send("👍 Server db working well!");
 })
 /**
@@ -51,7 +35,7 @@ router.get('/query', (req, res) => {
         res.send(error);
     });
 });
-router.get('/test', (req, res) => {
+router.get('/test', requireToken,(req, res) => {
     console.log("Test DB");
     testDb().then((data: any) => {
         res.send(data);
@@ -63,7 +47,7 @@ router.get('/test', (req, res) => {
 /**
  * Api for apps request
  */
-router.get('/apps', (req, res) => {
+router.get('/apps', requireToken,(req, res) => {
     getApps().then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
@@ -71,7 +55,7 @@ router.get('/apps', (req, res) => {
     });
 });
 
-router.get('/app/uid', (req, res) => {
+router.get('/app/uid',requireToken, (req, res) => {
     const email = req.query.email || null;
     const app = req.query.app || null;
     if (email && app) {
