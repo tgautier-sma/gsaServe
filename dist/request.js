@@ -29,6 +29,7 @@ exports.get = get;
 // Check token before execute the request
 const requireToken = (req, res, next) => {
     const authHeader = String(req.headers['authorization'] || '');
+    // console.log("Check auth",authHeader);
     if (authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7, authHeader.length);
         jsonwebtoken_1.default.verify(token, appSecret, (err, decoded) => {

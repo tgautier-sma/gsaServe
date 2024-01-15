@@ -23,6 +23,7 @@ export const get = async (url: string) => {
 // Check token before execute the request
 export const requireToken = (req: any, res: any, next: any) => {
     const authHeader = String(req.headers['authorization'] || '');
+    // console.log("Check auth",authHeader);
     if (authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7, authHeader.length);
         jwt.verify(token, appSecret, (err:VerifyErrors, decoded: JwtPayload) => {

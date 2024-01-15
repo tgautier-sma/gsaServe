@@ -88,7 +88,8 @@ router.post('/login', (req, res) => {
             // console.log("USER:", user);
             // Validate the user's credentials
             if (!user || user.password !== password) {
-                return res.status(401).send({ status: "error", message: 'Invalid credentials' });
+                // return res.status(401).send({ status: "error", message: 'Invalid credentials' });
+                return res.send(401, { status: "error", message: 'Invalid credentials' });
             }
             // Verify the user's token
             try {
@@ -145,7 +146,7 @@ router.post('/check', requireToken, (req, res) => {
     const { token } = req.body;
     jsonwebtoken_1.default.verify(token, appSecret, (err, decoded) => {
         if (err) {
-            res.status(401).send({ message: 'Invalid token', data: err });
+            res.status(401).send({ status: "error", message: 'Invalid token', data: err });
         }
         else {
             // Token is valid, proceed to the next middleware or route handler
@@ -155,7 +156,7 @@ router.post('/check', requireToken, (req, res) => {
                 decoded['expireAt'] = dateFormat.format(new Date(decoded.exp * 1000));
                 res.send(decoded);
             }).catch(error => {
-                res.status(401).send({ message: 'Invalid credential' });
+                res.status(401).send({ status: "error", message: 'Invalid credential' });
             });
         }
     });
