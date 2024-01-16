@@ -12,13 +12,28 @@ router.get('/', (req, res) => {
 /**
  * API for GeoPortail access
  */
-router.get('/api/geo/config', (req, res) => {
+router.get('/config', (req, res) => {
     (0, geo_1.getGeoConfig)().then((config) => {
         console.log("(i) Config", config);
         res.send(config);
     }).catch((error) => {
         res.send(error);
     });
+});
+router.get('/search', (req, res) => {
+    const q = req.query.q || null;
+    const limit = req.query.limit || 5;
+    if (q) {
+        (0, geo_1.getAdress)(q, limit).then((data) => {
+            console.log("(i) Adress", data);
+            res.send(data);
+        }).catch((error) => {
+            res.send(error);
+        });
+    }
+    else {
+        res.send({ message: "Search parameter required. Please fill the q variable." });
+    }
 });
 module.exports = router;
 //# sourceMappingURL=router.js.map

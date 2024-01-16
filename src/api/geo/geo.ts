@@ -15,3 +15,13 @@ export const getGeoConfig = async () => {
         })
     })
 }
+export const getAdress = async (adr: any, limit: any) => {
+    return new Promise((resolve, reject) => {
+        const url = `https://api-adresse.data.gouv.fr/search?q=${adr}&limit=${limit}`
+        get(url).then((response: any) => {
+            resolve(response);
+        }, (error: any) => {
+            reject(null)
+        })
+    })
+}
