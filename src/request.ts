@@ -7,7 +7,7 @@ setRequester(isProxy);
 const appSecret = 'supersecret';
 
 export const get = async (url: string) => {
-    console.log("(r) Get Request");
+    console.log("(r) Get Request",url);
     return new Promise((resolve, reject) => {
         axiosProxy.get(url)
             .then((response) => {

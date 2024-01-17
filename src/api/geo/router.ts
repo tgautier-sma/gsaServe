@@ -27,7 +27,7 @@ router.get('/search', (req, res) => {
     const limit = req.query.limit || 5;
     if (q) {
         getAdress(q, limit).then((data: any) => {
-            console.log("(i) Adress", data);
+            // console.log("(i) Adress", data);
             res.send(data);
         }).catch((error: any) => {
             res.send(error);

@@ -12,7 +12,7 @@ let axiosProxy;
 setRequester(isProxy);
 const appSecret = 'supersecret';
 const get = async (url) => {
-    console.log("(r) Get Request");
+    console.log("(r) Get Request", url);
     return new Promise((resolve, reject) => {
         axiosProxy.get(url)
             .then((response) => {
