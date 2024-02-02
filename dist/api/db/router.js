@@ -159,35 +159,24 @@ router.put('/store', (req, res) => {
     }
 });
 router.delete('/store', (req, res) => {
-    const uid = req.query.uid || null;
-    const key = req.query.key || null;
-    if (uid && key) {
-        (0, controller_1.deleteStoreKey)(uid, key).then((data) => {
+    const id = req.query.id || null;
+    if (id) {
+        (0, controller_1.deleteStoreId)(id).then((data) => {
             res.send(data);
         }).catch((error) => {
-            if (error.code == "23503") {
-                res.send({
-                    ts: new Date(),
-                    status: 'error',
-                    code: error.code,
-                    msg: `Application code ${uid} unknown. No store deleted.`
-                });
-            }
-            else {
-                res.send({
-                    ts: new Date(),
-                    status: 'error',
-                    code: error.code,
-                    msg: `No store delete.`
-                });
-            }
+            res.send({
+                ts: new Date(),
+                status: 'error',
+                code: error.code,
+                msg: `No store delete.`
+            });
         });
     }
     else {
         res.send({
             ts: new Date(),
             status: 'error',
-            msg: 'Application code and key are mandatory. No store updated.'
+            msg: 'Store Id is mandatory. No store updated.'
         });
     }
 });

@@ -71,14 +71,14 @@ router.post('/register', (req, res) => {
             });
         }
         else {
-            return res.send({ status: "error", message: 'Register not authorized', data: null });
+            return res.send({ status: "error", message: 'Account not allowed to register', data: null });
         }
     }).catch(error => {
         return res.send({ status: "error", message: 'Technical error', data: error });
     });
 });
 router.post('/login', (req, res) => {
-    const { email, password, token } = req.body;
+    var { email, password, token } = req.body;
     // console.log(req.body);
     // Find the user with the given email address
     (0, controller_1.getAuth)(email).then(data => {
@@ -89,25 +89,29 @@ router.post('/login', (req, res) => {
             // Validate the user's credentials
             if (!user || user.password !== password) {
                 // return res.status(401).send({ status: "error", message: 'Invalid credentials' });
-                return res.send(401, { status: "error", message: 'Invalid credentials' });
+                return res.status(401).send({ status: "error", message: 'Invalid credentials' });
             }
             // Verify the user's token
+            const secret = user.secret;
+            let isValid = false;
+            // token = authenticator.generate(secret);
             try {
-                const secret = user.secret;
-                // const token = authenticator.generate(secret);
-                const verified = otplib_1.authenticator.verify({ token, secret });
-                if (!verified) {
-                    return res.status(401).send({ status: "error", message: "Invalid token" });
-                }
-                // User is authenticated
-                const jwToken = jsonwebtoken_1.default.sign({ email: email, userName: user.name }, appSecret, { expiresIn: jwtExpire });
-                return res.send({ status: "ok", message: "Login successful", token: jwToken });
+                isValid = otplib_1.authenticator.check(token.toString(), secret);
+                // console.log("Verify user secret:", secret, ", token:", token, ", Result:", isValid, typeof isValid);
             }
             catch (err) {
                 // Possible errors
                 // - options validation
                 // - "Invalid input - it is not base32 encoded string" (if thiry-two is used)
-                console.error(err);
+                console.log("Error Verify user secret:", secret, ", token:", token, ", Result:", err);
+                return res.status(401).send({ status: "error", message: "Invalid token" });
+            }
+            if (isValid) {
+                // User is authenticated
+                const jwToken = jsonwebtoken_1.default.sign({ email: email, userName: user.name }, appSecret, { expiresIn: jwtExpire });
+                return res.send({ status: "ok", message: "Login successful", token: jwToken });
+            }
+            else {
                 return res.status(401).send({ status: "error", message: "Invalid token" });
             }
         }

@@ -6,7 +6,7 @@ const appSecret = 'supersecret';
 import {
     readDb, testDb,
     getApps, createApp, getApp,
-    getStores, createStoreKey, updateStoreKey, deleteStoreKey,
+    getStores, createStoreKey, updateStoreKey, deleteStoreId,
     getStoreKey, getStoreApp
 } from "./controller";
 
@@ -35,7 +35,7 @@ router.get('/query', (req, res) => {
         res.send(error);
     });
 });
-router.get('/test', requireToken,(req, res) => {
+router.get('/test', requireToken, (req, res) => {
     console.log("Test DB");
     testDb().then((data: any) => {
         res.send(data);
@@ -47,15 +47,14 @@ router.get('/test', requireToken,(req, res) => {
 /**
  * Api for apps request
  */
-router.get('/apps', requireToken,(req, res) => {
+router.get('/apps', requireToken, (req, res) => {
     getApps().then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);
     });
 });
-
-router.get('/app/uid',requireToken, (req, res) => {
+router.get('/app/uid', requireToken, (req, res) => {
     const email = req.query.email || null;
     const app = req.query.app || null;
     if (email && app) {
@@ -162,33 +161,23 @@ router.put('/store', (req, res) => {
     }
 });
 router.delete('/store', (req, res) => {
-    const uid = req.query.uid || null;
-    const key = req.query.key || null;
-    if (uid && key) {
-        deleteStoreKey(uid, key).then((data: any) => {
+    const id = req.query.id || null;
+    if (id) {
+        deleteStoreId(id).then((data: any) => {
             res.send(data);
         }).catch((error: any) => {
-            if (error.code == "23503") {
-                res.send({
-                    ts: new Date(),
-                    status: 'error',
-                    code: error.code,
-                    msg: `Application code ${uid} unknown. No store deleted.`
-                });
-            } else {
-                res.send({
-                    ts: new Date(),
-                    status: 'error',
-                    code: error.code,
-                    msg: `No store delete.`
-                });
-            }
+            res.send({
+                ts: new Date(),
+                status: 'error',
+                code: error.code,
+                msg: `No store delete.`
+            });
         });
     } else {
         res.send({
             ts: new Date(),
             status: 'error',
-            msg: 'Application code and key are mandatory. No store updated.'
+            msg: 'Store Id is mandatory. No store updated.'
         });
     }
 });
