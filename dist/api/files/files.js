@@ -5,6 +5,7 @@ exports.deleteBlob = exports.uploadBlob = exports.listBlob = exports.config = vo
  * VERECL BLOB STORE
  */
 const blob_1 = require("@vercel/blob");
+console.log("Vercel Blob Key :", process.env.BLOB_READ_WRITE_TOKEN);
 exports.config = {
     runtime: 'edge',
 };
