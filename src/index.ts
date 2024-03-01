@@ -94,8 +94,6 @@ app.use("/api/geo", geoRouter);
 app.use("/api/files", filesRouter);
 // **** End Routing ****
 
-
-
 // Activate Application server
 const port = 3000
 app.listen(port, function () {
