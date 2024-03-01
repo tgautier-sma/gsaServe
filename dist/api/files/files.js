@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBlob = exports.uploadBlob = exports.listBlob = exports.config = void 0;
 /**
- * VERECL BLOB STORE
+ * VERCEL BLOB STORE
  */
 const blob_1 = require("@vercel/blob");
 console.log("Vercel Blob Key :", process.env.BLOB_READ_WRITE_TOKEN);

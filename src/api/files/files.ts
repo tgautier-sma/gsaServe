@@ -1,8 +1,9 @@
 /**
- * VERECL BLOB STORE
+ * VERCEL BLOB STORE
  */
 import { list, put, del } from '@vercel/blob';
 console.log("Vercel Blob Key :", process.env.BLOB_READ_WRITE_TOKEN);
+
 export const config = {
     runtime: 'edge',
 };

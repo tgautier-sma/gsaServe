@@ -85,12 +85,12 @@ app.post('/api/event', (req, res) => {
 var authRouter = require('./api/auth/router');
 var dbRouter = require('./api/db/router');
 var geoRouter = require('./api/geo/router');
-var aiRouter = require('./api/ai/router');
+/* var aiRouter = require('./api/ai/router'); */
 var filesRouter = require('./api/files/router');
 app.use("/api/auth", authRouter);
 app.use("/api/db", dbRouter);
 app.use("/api/geo", geoRouter);
-app.use("/api/ai", aiRouter);
+/* app.use("/api/ai", aiRouter); */
 app.use("/api/files", filesRouter);
 // **** End Routing ****
 
