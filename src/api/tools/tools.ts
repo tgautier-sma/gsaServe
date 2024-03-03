@@ -1,5 +1,5 @@
 import { get } from "../../request"
-const cheerio = require('cheerio');
+import cheerio from 'cheerio';
 
 export const fetchMetaTags = async (url: string) => {
     return new Promise((resolve, reject) => {
