@@ -10,20 +10,20 @@ router.get('/', (req, res) => {
     res.send("👍 Server tools working well!");
 });
 /**
- * API for GeoPortail access
+ * API for get information from request
  */
 router.get('/meta', (req, res) => {
     const url = req.query.url || null;
     if (url) {
         (0, tools_1.fetchMetaTags)(url).then((data) => {
-            console.log("(i) Meta", data);
+            console.log("(i) Meta from url :", url);
             res.send(data);
         }).catch((error) => {
             res.send(error);
         });
     }
     else {
-        res.send("You must provide an url");
+        res.send({ error: "You must provide an url" });
     }
 });
 module.exports = router;
