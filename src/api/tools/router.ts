@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+
 import { fetchMetaTags } from "./tools";
 
 router.get('/', (req, res) => {
@@ -21,6 +22,5 @@ router.get('/meta', (req, res) => {
         res.send({error:"You must provide an url"});
     }    
 });
-
 
 module.exports = router;
