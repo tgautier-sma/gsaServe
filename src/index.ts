@@ -6,8 +6,8 @@ var cors = require('cors')
 import path from 'path';
 import 'dotenv/config';
 // Vercel Analytics
-import { inject } from '@vercel/analytics';
-inject();
+// import { inject } from '@vercel/analytics';
+// inject();
 
 /**
  * Logging system
@@ -86,13 +86,13 @@ var authRouter = require('./api/auth/router');
 var dbRouter = require('./api/db/router');
 var geoRouter = require('./api/geo/router');
 /* var aiRouter = require('./api/ai/router'); */
-var filesRouter = require('./api/files/router');
+// var filesRouter = require('./api/files/router');
 var toolsRouter = require('./api/tools/router');
 app.use("/api/auth", authRouter);
 app.use("/api/db", dbRouter);
 app.use("/api/geo", geoRouter);
 /* app.use("/api/ai", aiRouter); */
-app.use("/api/files", filesRouter);
+// app.use("/api/files", filesRouter);
 app.use("/api/tools", toolsRouter);
 // **** End Routing ****
 
