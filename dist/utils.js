@@ -12,4 +12,4 @@ const genUniqueId = () => {
     return `${dateStr}-${randomStr}`;
 };
 exports.genUniqueId = genUniqueId;
-//# sourceMappingURL=tools.js.map
+//# sourceMappingURL=utils.js.map

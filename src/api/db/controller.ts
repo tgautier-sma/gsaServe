@@ -1,7 +1,7 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, db } from "@vercel/postgres";
-import { genUniqueId } from '../../tools';
+import { genUniqueId } from '../../utils';
 
 
 /* 
