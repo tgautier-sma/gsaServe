@@ -1,8 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchMetaTags = void 0;
 const request_1 = require("../../request");
-// import cheerio from 'cheerio';
+const cheerio_1 = __importDefault(require("cheerio"));
 const fetchMetaTags = async (url) => {
     return new Promise((resolve, reject) => {
         const ds = new Date().getTime();
@@ -10,8 +13,8 @@ const fetchMetaTags = async (url) => {
             .then((data) => {
             // console.log(data);
             const metaTags = {};
-            /* const $ = cheerio.load(data);
-            $('meta').each((i: any, element: any) => {
+            const $ = cheerio_1.default.load(data);
+            $('meta').each((i, element) => {
                 const name = $(element).attr('name')
                     || $(element).attr('property')
                     || $(element).attr('http-equiv')
@@ -19,7 +22,7 @@ const fetchMetaTags = async (url) => {
                 if (name) {
                     metaTags[name] = $(element).attr('content');
                 }
-            }); */
+            });
             const de = new Date().getTime();
             resolve({
                 url: url,
@@ -34,4 +37,5 @@ const fetchMetaTags = async (url) => {
     });
 };
 exports.fetchMetaTags = fetchMetaTags;
+exports.default = exports.fetchMetaTags;
 //# sourceMappingURL=tools.js.map

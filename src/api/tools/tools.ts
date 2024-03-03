@@ -1,5 +1,5 @@
-import { get } from "../../request"
-// import cheerio from 'cheerio';
+import { get } from "../../request";
+import cheerio from 'cheerio';
 
 export const fetchMetaTags = async (url: string) => {
     return new Promise((resolve, reject) => {
@@ -8,8 +8,7 @@ export const fetchMetaTags = async (url: string) => {
             .then((data: any) => {
                 // console.log(data);
                 const metaTags: any = {};
-                
-                /* const $ = cheerio.load(data);
+                const $ = cheerio.load(data);
                 $('meta').each((i: any, element: any) => {
                     const name = $(element).attr('name')
                         || $(element).attr('property')
@@ -18,7 +17,7 @@ export const fetchMetaTags = async (url: string) => {
                     if (name) {
                         metaTags[name] = $(element).attr('content');
                     }
-                }); */
+                });
                 const de = new Date().getTime();
                 resolve({
                     url: url,
@@ -30,5 +29,6 @@ export const fetchMetaTags = async (url: string) => {
             .catch(error => {
                 reject({ error: error.message, ts: new Date().toJSON() });
             })
-    })
+    });
 }
+export default fetchMetaTags;
