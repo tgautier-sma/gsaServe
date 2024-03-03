@@ -37,5 +37,4 @@ const fetchMetaTags = async (url) => {
     });
 };
 exports.fetchMetaTags = fetchMetaTags;
-exports.default = exports.fetchMetaTags;
 //# sourceMappingURL=tools.js.map

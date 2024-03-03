@@ -31,4 +31,3 @@ export const fetchMetaTags = async (url: string) => {
             })
     });
 }
-export default fetchMetaTags;
