@@ -3,17 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreId = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
 const utils_1 = require("../../utils");
-/*
-import { createKysely } from "@vercel/postgres-kysely";
-const myDb = createKysely();
- */
-/* For debug only
-import { postgresConnectionString} from "@vercel/postgres";
-const pooledConnectionString = postgresConnectionString('pool');
-const directConnectionString = postgresConnectionString('direct');
-console.log("Pool",pooledConnectionString);
-console.log("Direct",directConnectionString);
-*/
 const readDb = async (db, id, email, page, pageSize) => {
     const offset = (+page - 1) * +pageSize;
     const dbName = db.toUpperCase();
@@ -23,9 +12,9 @@ const readDb = async (db, id, email, page, pageSize) => {
         return { totalCount: count.rows[0].count, rows: rows };
     }
     else if (email) {
-        // email = "%" + email;
-        let count = await (0, postgres_1.sql) `SELECT count(*) FROM public.cards WHERE email=${email};`;
-        let { rows } = await (0, postgres_1.sql) `SELECT * FROM cards WHERE email=${email} LIMIT ${pageSize} OFFSET ${offset};`;
+        email = "%" + email + "%";
+        let count = await (0, postgres_1.sql) `SELECT count(*) FROM public.cards WHERE email LIKE ${email};`;
+        let { rows } = await (0, postgres_1.sql) `SELECT * FROM cards WHERE email LIKE ${email} LIMIT ${pageSize} OFFSET ${offset};`;
         return { totalCount: count.rows[0].count, email: email, page: page, pageSize: pageSize, rows: rows };
     }
     else {
