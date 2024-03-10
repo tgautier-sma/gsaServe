@@ -1,6 +1,5 @@
 
 import { authenticator } from 'otplib';
-import speakeasy from 'speakeasy';
 import jwt from 'jsonwebtoken';
 import expressJWT from 'express-jwt';
 import QRCode from 'qrcode';

@@ -1,4 +1,3 @@
-import speakeasy from 'speakeasy';
 export const users: any[] = [];
 export class User {
     id: string;

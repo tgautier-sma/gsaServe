@@ -1,5 +1,5 @@
-# Use Node 20 alpine as parent image
-FROM node:lts-alpine
+# Use Node 20.11 alpine as parent image
+FROM node:20.11-alpine
 
 # Change the working directory on the Docker image to /app
 WORKDIR /app
@@ -8,9 +8,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install
-
-
+RUN npm install --omit=dev
 
 # Copy the rest of project files into this image
 COPY . .
