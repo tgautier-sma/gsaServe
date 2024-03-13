@@ -8,6 +8,7 @@ const request_1 = require("../../request");
 const router = express_1.default.Router();
 const appSecret = 'supersecret';
 const controller_1 = require("./controller");
+const control_manage_1 = require("./control_manage");
 router.get('/', request_1.requireToken, (req, res) => {
     res.send("👍 Server db working well!");
 });
@@ -41,7 +42,7 @@ router.get('/table/create', (req, res) => {
         { name: "test5" },
     ];
     // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
-    (0, controller_1.tableCreate)(tableName, fields).then((data) => {
+    (0, control_manage_1.tableCreate)(tableName, fields).then((data) => {
         res.send(data);
     }).catch((error) => {
         res.send(error);

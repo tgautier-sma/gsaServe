@@ -7,9 +7,11 @@ import {
     readDb, testDb,
     getApps, createApp, getApp,
     getStores, createStoreKey, updateStoreKey, deleteStoreId,
-    getStoreKey, getStoreApp,
-    tableCreate
+    getStoreKey, getStoreApp
 } from "./controller";
+import {
+    tableCreate
+} from "./control_manage";
 
 
 
