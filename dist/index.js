@@ -3,12 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const env = process.env;
 const express_1 = __importDefault(require("express"));
 const helmet_1 = __importDefault(require("helmet"));
 const body_parser_1 = __importDefault(require("body-parser"));
 var cors = require('cors');
-require("dotenv/config");
+// Load environment variables
+const env = process.env;
+const envFileName = `.env.${env.NODE_ENV || "development"}`;
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config({ path: envFileName });
 // Vercel Analytics
 // import { inject } from '@vercel/analytics';
 // inject();
@@ -34,6 +37,8 @@ if (process.env.NODE_ENV !== 'production') {
         format: winston_1.default.format.simple(),
     }));
 }
+else {
+}
 /**
  * Configure server application
  */
@@ -46,7 +51,7 @@ app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.raw());
 app.use(body_parser_1.default.text());
-logger.info("System launched");
+logger.info("System launched for " + env.NODE_ENV);
 /**
  * APIs for general access to server
  */

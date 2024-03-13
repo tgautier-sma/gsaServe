@@ -31,16 +31,17 @@ router.get('/query', (req, res) => {
         res.send(error);
     });
 });
-router.get('/table/create', (req, res) => {
+router.get('/table/list', (req, res) => {
+    (0, control_manage_1.tableList)().then((data) => {
+        res.send(data);
+    }).catch((error) => {
+        res.send(error);
+    });
+});
+router.post('/table/create', (req, res) => {
     const table = req.query.table || null;
     const tableName = table.toString();
-    const fields = [
-        { name: "test1" },
-        { name: "test2" },
-        { name: "test3" },
-        { name: "test4" },
-        { name: "test5" },
-    ];
+    const { fields } = req.body;
     // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
     (0, control_manage_1.tableCreate)(tableName, fields).then((data) => {
         res.send(data);

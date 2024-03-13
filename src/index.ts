@@ -1,10 +1,14 @@
-const env = process.env;
 import express from 'express';
 import helmet from "helmet";
 import bodyParser from 'body-parser';
 var cors = require('cors')
-import path from 'path';
-import 'dotenv/config';
+
+// Load environment variables
+const env = process.env;
+const envFileName = `.env.${env.NODE_ENV || "development"}`
+import dotenv from 'dotenv';
+dotenv.config({ path: envFileName });
+
 // Vercel Analytics
 // import { inject } from '@vercel/analytics';
 // inject();
@@ -30,6 +34,8 @@ if (process.env.NODE_ENV !== 'production') {
     logger.add(new winston.transports.Console({
         format: winston.format.simple(),
     }));
+} else {
+
 }
 
 /**
@@ -45,7 +51,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
 
-logger.info("System launched");
+logger.info("System launched for " + env.NODE_ENV);
 
 
 /**

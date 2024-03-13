@@ -10,7 +10,7 @@ import {
     getStoreKey, getStoreApp
 } from "./controller";
 import {
-    tableCreate
+    tableCreate, tableList
 } from "./control_manage";
 
 
@@ -38,16 +38,17 @@ router.get('/query', (req, res) => {
         res.send(error);
     });
 });
-router.get('/table/create', (req, res) => {
+router.get('/table/list', (req, res) => {
+    tableList().then((data: any) => {
+        res.send(data);
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
+router.post('/table/create', (req, res) => {
     const table = req.query.table || null;
     const tableName: string = table.toString();
-    const fields=[
-        {name:"test1"},
-        {name:"test2"},
-        {name:"test3"},
-        {name:"test4"},
-        {name:"test5"},
-    ]
+    const { fields } = req.body;
     // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
     tableCreate(tableName, fields).then((data: any) => {
         res.send(data);

@@ -4,7 +4,7 @@
   "description": "Serveur Node pour appels simples",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.ts",
+    "start": "set NODE_ENV=development && nodemon src/index.ts",
     "build": "rimraf dist && tsc",
     "docker.build": "docker build . -t gsa_serve",
     "docker.run": "docker run -d -p 3000:3000 gsa_serve",
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
+    "@types/helmet": "^4.0.0",
     "@types/qrcode": "^1.5.5",
     "@types/tunnel": "^0.0.7",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
