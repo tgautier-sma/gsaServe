@@ -7,7 +7,8 @@ import {
     readDb, testDb,
     getApps, createApp, getApp,
     getStores, createStoreKey, updateStoreKey, deleteStoreId,
-    getStoreKey, getStoreApp
+    getStoreKey, getStoreApp,
+    tableCreate
 } from "./controller";
 
 
@@ -30,6 +31,23 @@ router.get('/query', (req, res) => {
 
     // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
     readDb(dbName, id, email, pageNumber, pageSize).then((data: any) => {
+        res.send(data);
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
+router.get('/table/create', (req, res) => {
+    const table = req.query.table || null;
+    const tableName: string = table.toString();
+    const fields=[
+        {name:"test1"},
+        {name:"test2"},
+        {name:"test3"},
+        {name:"test4"},
+        {name:"test5"},
+    ]
+    // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
+    tableCreate(tableName, fields).then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);

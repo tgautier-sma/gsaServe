@@ -30,6 +30,23 @@ router.get('/query', (req, res) => {
         res.send(error);
     });
 });
+router.get('/table/create', (req, res) => {
+    const table = req.query.table || null;
+    const tableName = table.toString();
+    const fields = [
+        { name: "test1" },
+        { name: "test2" },
+        { name: "test3" },
+        { name: "test4" },
+        { name: "test5" },
+    ];
+    // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
+    (0, controller_1.tableCreate)(tableName, fields).then((data) => {
+        res.send(data);
+    }).catch((error) => {
+        res.send(error);
+    });
+});
 router.get('/test', request_1.requireToken, (req, res) => {
     console.log("Test DB");
     (0, controller_1.testDb)().then((data) => {

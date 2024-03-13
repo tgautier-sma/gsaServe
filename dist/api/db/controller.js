@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreId = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
+exports.tableCreate = exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreId = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
 const utils_1 = require("../../utils");
 const readDb = async (db, id, email, page, pageSize) => {
@@ -187,4 +187,24 @@ const deleteAuth = async (id) => {
     }
 };
 exports.deleteAuth = deleteAuth;
+// Table CREATE and UDPATE
+// field:name, type, length
+const tableCreate = async (table, fields) => {
+    let req = `CREATE TABLE ${table} ( `;
+    req = `${req} id serial NOT NULL, `;
+    let f = [];
+    fields.forEach((field) => {
+        f.push(`${field.name} varchar NULL`);
+    });
+    req = req + f.join(", ");
+    req = req + ", created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP";
+    req = req + `, CONSTRAINT ${table}_pk PRIMARY KEY (id)`;
+    req = req + " );";
+    console.log(`${req}`);
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `${req}`;
+    client.release();
+    return ret;
+};
+exports.tableCreate = tableCreate;
 //# sourceMappingURL=controller.js.map

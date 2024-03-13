@@ -163,3 +163,24 @@ export const deleteAuth = async (id: any) => {
         return ret;
     }
 }
+
+// Table CREATE and UDPATE
+// field:name, type, length
+export const tableCreate = async (table: string, fields: any) => {
+    let req = `CREATE TABLE ${table} ( `;
+    req = `${req} id serial NOT NULL, `;
+    let f: Array<string> = [];
+    fields.forEach((field: any) => {
+        f.push(`${field.name} varchar NULL`);
+    });
+    req = req + f.join(", ");
+    req = req + ", created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP";
+    req = req + `, CONSTRAINT ${table}_pk PRIMARY KEY (id)`;
+    req = req + " );";
+    console.log(`${req}`);
+    const client = await db.connect();
+    const ret = await client.sql`${req}`;
+    client.release();
+    return ret;
+
+}
