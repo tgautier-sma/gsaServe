@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
 router.get('/check', (req, res) => {
     const target = process.env.NODE_ENV
     const env = process.env;
-    res.send({ target: target, env: env });
+    res.send({ env: { target: target, exec: env.VERCEL_ENV, host: env.POSTGRES_HOST }, lastversion: env.VERCEL_GIT_COMMIT_MESSAGE, });
 });
 /**
  * API for get information from request
