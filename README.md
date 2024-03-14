@@ -4,3 +4,4 @@ Backend for gsa operation and request exexcution
 * nodeJs
 * express
 * axios
+* postgres / pg 

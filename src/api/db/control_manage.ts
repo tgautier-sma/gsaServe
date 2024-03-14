@@ -61,17 +61,22 @@ export const tableList = async (): Promise<any> => {
  * create_on (timestamp), 
  * update_on (timestamp)
  * @param table Table Name
- * @param fields Array of fields decription {field:string, type:string, notNull:boolean}
+ * @param fields Array of fields decription {field:string, header:string, type:string, size:string, notNull:boolean}
  * @returns 
  */
 export const tableCreate = async (table: string, fields: any) => {
+    console.log(`(i) Create table ${table}, ${fields.length} fields`);
     let req = `CREATE TABLE ${table} ( `;
     req = `${req} id serial NOT NULL, `;
     let f: Array<string> = [];
     fields.forEach((field: any) => {
-        const ftype = field.type ? field.type : "varchar(256)";
+        const ftype = (field.type ? field.type : "varchar").toUpperCase();
         const fnull = field.notNull ? "NOT NULL" : "NULL";
-        f.push(`${field.name} ${ftype} ${fnull}`);
+        let fsize = "";
+        if (["CHAR", "VARCHAR"].includes(ftype)) {
+            fsize = "(" + (field.size ? field.size : "256") + ")";
+        }
+        f.push(`${field.name} ${ftype}${fsize} ${fnull}`);
     });
     req = req + f.join(", ");
     req = req + ", created_on timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP";
@@ -109,35 +114,54 @@ export const tableDef = async (table: string) => {
 }
 
 export const tableInsert = async (table: string, data: Array<any>) => {
+    console.log(`(i) Batch insert. Table:${table}. Rows:${data.length}`);
     // 1. Get Table structure
     const res: any = await tableDef(table);
+    console.log("Table def ", res);
     let tDef = res.rows.map((item: any) => item.column_name);
-    var filteredDef = tDef.filter((e: any) => { return (e !== 'id' && e != "created_on" && e !== 'updated_on') })
-    // console.log(tDef,filteredDef);
+    var filteredDef = tDef.filter((e: any) => { return (e !== 'id' && e != "created_on" && e !== 'updated_on') });
     // 2. Generate sql script
-    let reqList: any = []
+    let reqList: any = [];
+    let scriptList: any = [];
+    let scriptListResult: any = [];
+    let i = 1;
+    let numScript = 1;
     data.forEach(row => {
-        //console.log(row);
         const rowKeys = Object.keys(row);
-        // console.log(rowKeys);
         var tvalue: any = [];
+        var tname: any = [];
         rowKeys.forEach(field => {
             if (filteredDef.includes(field.toLowerCase())) {
-                let v = row[field]+"";
+                let v = row[field] + "";
                 try {
-                    v=v.replace(/'/g, "''");
+                    v = v.replace(/'/g, "''");
                 } catch (error) {
-                    console.log("==> Error replace",error);
+                    console.log("==> Error replace", error);
                 }
-                let vf = "'"+v+"'";
+                let vf = "'" + v + "'";
+                tname.push(field)
                 tvalue.push(vf);
-            }
+            } 
         });
-        let req = `INSERT INTO ${table} (${filteredDef.join(',')}) VALUES(${tvalue.join(',')});`;
-        console.log(req);
+        let req = `INSERT INTO ${table} (${tname.join(',')}) VALUES(${tvalue.join(',')});`;
         reqList.push(req);
+        console.log("Ajout de la requete n°", i);
+        if (i % 10 == 0) {
+            // execute script
+            console.log("Création du script", numScript);
+            scriptList.push(reqList.join(''));
+            reqList = [];
+            numScript++;
+        }
+        i++;
     });
-    const script = reqList.join('');
-    const resScript = await execReq("tableInsert", script, false);
-    return { script: script, result: resScript };
+    scriptList.push(reqList.join(''));
+    var scriptLot = 1;
+    scriptList.forEach((script: any) => {
+        console.log("Execute script ", scriptLot);
+        const resScript = execReq("tableInsert", script, false);
+        scriptListResult.push(resScript);
+        scriptLot++
+    });
+    return { script: scriptList, result: scriptListResult };
 }

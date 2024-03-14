@@ -46,7 +46,7 @@ router.post('/table/create', (req, res) => {
     if (!Array.isArray(fields)) {
         // Simple definition : name separated with a comma
         fieldsDef = fields.split(',').map((item) => {
-            return { "name": item };
+            return { "name": item, "header": item };
         });
     }
     else {
