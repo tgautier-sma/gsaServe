@@ -1,4 +1,5 @@
 import express from "express";
+
 const router = express.Router();
 
 import { fetchMetaTags } from "./tools";
@@ -6,6 +7,12 @@ import { fetchMetaTags } from "./tools";
 router.get('/', (req, res) => {
     res.send("👍 Server tools working well!");
 })
+
+router.get('/check', (req, res) => {
+    const target = process.env.NODE_ENV
+    const env = process.env;
+    res.send({ target: target, env: env });
+});
 /**
  * API for get information from request
  */
