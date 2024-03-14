@@ -10,7 +10,7 @@ import {
     getStoreKey, getStoreApp
 } from "./controller";
 import {
-    tableCreate, tableList
+    tableCreate, tableList, tableDef, tableInsert
 } from "./control_manage";
 
 
@@ -49,12 +49,48 @@ router.post('/table/create', (req, res) => {
     const table = req.query.table || null;
     const tableName: string = table.toString();
     const { fields } = req.body;
-    // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
-    tableCreate(tableName, fields).then((data: any) => {
+    let fieldsDef: Array<any> = [];
+    if (!Array.isArray(fields)) {
+        // Simple definition : name separated with a comma
+        fieldsDef = fields.split(',').map((item: any) => {
+            return { "name": item }
+        });
+    } else {
+        fieldsDef = fields;
+    }
+    if (fieldsDef.length >= 1) {
+        tableCreate(tableName, fieldsDef).then((data: any) => {
+            res.send(data);
+        }).catch((error: any) => {
+            res.send(error);
+        });
+    } else {
+        res.send("No field definition");
+    }
+
+});
+router.get('/table/def', (req, res) => {
+    const table = req.query.table || null;
+    const tableName: string = table.toString();
+    tableDef(tableName).then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);
     });
+});
+router.post('/table/insert', (req, res) => {
+    const table = req.query.table || null;
+    if (table) {
+        const tableName: string = table.toString();
+        const { data } = req.body;
+        tableInsert(tableName, data).then((data: any) => {
+            res.send(data);
+        }).catch((error: any) => {
+            res.send(error);
+        });
+    } else {
+        res.send('No table specified');
+    }
 });
 router.get('/test', requireToken, (req, res) => {
     console.log("Test DB");

@@ -55,7 +55,6 @@ export const tableList = async (): Promise<any> => {
     return await execReq("tableList", req, true);
 }
 
-
 /**
  * CREATE a table with fields definition and 3 common fields : 
  * id (incremental), 
@@ -100,4 +99,45 @@ $$ language 'plpgsql';`;
     const r1 = await execReq("functionAutoUpdate", reqFunc);
     const r2 = await execReq("tableAutoUpdate", req);
     return { functionAutoUpdate: r1, tableAutoUpdate: r2 };
+}
+
+export const tableDef = async (table: string) => {
+    let req = `SELECT column_name, data_type, character_maximum_length, is_nullable, column_default 
+  FROM information_schema.columns 
+  WHERE  table_name = '${table}';`;
+    return await execReq("tablDef", req, false);
+}
+
+export const tableInsert = async (table: string, data: Array<any>) => {
+    // 1. Get Table structure
+    const res: any = await tableDef(table);
+    let tDef = res.rows.map((item: any) => item.column_name);
+    var filteredDef = tDef.filter((e: any) => { return (e !== 'id' && e != "created_on" && e !== 'updated_on') })
+    // console.log(tDef,filteredDef);
+    // 2. Generate sql script
+    let reqList: any = []
+    data.forEach(row => {
+        //console.log(row);
+        const rowKeys = Object.keys(row);
+        // console.log(rowKeys);
+        var tvalue: any = [];
+        rowKeys.forEach(field => {
+            if (filteredDef.includes(field.toLowerCase())) {
+                let v = row[field]+"";
+                try {
+                    v=v.replace(/'/g, "''");
+                } catch (error) {
+                    console.log("==> Error replace",error);
+                }
+                let vf = "'"+v+"'";
+                tvalue.push(vf);
+            }
+        });
+        let req = `INSERT INTO ${table} (${filteredDef.join(',')}) VALUES(${tvalue.join(',')});`;
+        console.log(req);
+        reqList.push(req);
+    });
+    const script = reqList.join('');
+    const resScript = await execReq("tableInsert", script, false);
+    return { script: script, result: resScript };
 }

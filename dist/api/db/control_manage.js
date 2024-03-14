@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tableAutoTimeStamp = exports.tableCreate = exports.tableList = void 0;
+exports.tableInsert = exports.tableDef = exports.tableAutoTimeStamp = exports.tableCreate = exports.tableList = void 0;
 const pg_1 = require("pg");
 // Define configuration connection
 const env = process.env;
@@ -105,4 +105,46 @@ $$ language 'plpgsql';`;
     return { functionAutoUpdate: r1, tableAutoUpdate: r2 };
 };
 exports.tableAutoTimeStamp = tableAutoTimeStamp;
+const tableDef = async (table) => {
+    let req = `SELECT column_name, data_type, character_maximum_length, is_nullable, column_default 
+  FROM information_schema.columns 
+  WHERE  table_name = '${table}';`;
+    return await execReq("tablDef", req, false);
+};
+exports.tableDef = tableDef;
+const tableInsert = async (table, data) => {
+    // 1. Get Table structure
+    const res = await (0, exports.tableDef)(table);
+    let tDef = res.rows.map((item) => item.column_name);
+    var filteredDef = tDef.filter((e) => { return (e !== 'id' && e != "created_on" && e !== 'updated_on'); });
+    // console.log(tDef,filteredDef);
+    // 2. Generate sql script
+    let reqList = [];
+    data.forEach(row => {
+        //console.log(row);
+        const rowKeys = Object.keys(row);
+        // console.log(rowKeys);
+        var tvalue = [];
+        rowKeys.forEach(field => {
+            if (filteredDef.includes(field.toLowerCase())) {
+                let v = row[field] + "";
+                try {
+                    v = v.replace(/'/g, "''");
+                }
+                catch (error) {
+                    console.log("==> Error replace", error);
+                }
+                let vf = "'" + v + "'";
+                tvalue.push(vf);
+            }
+        });
+        let req = `INSERT INTO ${table} (${filteredDef.join(',')}) VALUES(${tvalue.join(',')});`;
+        console.log(req);
+        reqList.push(req);
+    });
+    const script = reqList.join('');
+    const resScript = await execReq("tableInsert", script, false);
+    return { script: script, result: resScript };
+};
+exports.tableInsert = tableInsert;
 //# sourceMappingURL=control_manage.js.map

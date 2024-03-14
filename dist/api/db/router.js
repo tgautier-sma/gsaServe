@@ -42,12 +42,50 @@ router.post('/table/create', (req, res) => {
     const table = req.query.table || null;
     const tableName = table.toString();
     const { fields } = req.body;
-    // logger.info(`Read DB ${dbName},page ${page}, pageSize ${pageSize}`);
-    (0, control_manage_1.tableCreate)(tableName, fields).then((data) => {
+    let fieldsDef = [];
+    if (!Array.isArray(fields)) {
+        // Simple definition : name separated with a comma
+        fieldsDef = fields.split(',').map((item) => {
+            return { "name": item };
+        });
+    }
+    else {
+        fieldsDef = fields;
+    }
+    if (fieldsDef.length >= 1) {
+        (0, control_manage_1.tableCreate)(tableName, fieldsDef).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            res.send(error);
+        });
+    }
+    else {
+        res.send("No field definition");
+    }
+});
+router.get('/table/def', (req, res) => {
+    const table = req.query.table || null;
+    const tableName = table.toString();
+    (0, control_manage_1.tableDef)(tableName).then((data) => {
         res.send(data);
     }).catch((error) => {
         res.send(error);
     });
+});
+router.post('/table/insert', (req, res) => {
+    const table = req.query.table || null;
+    if (table) {
+        const tableName = table.toString();
+        const { data } = req.body;
+        (0, control_manage_1.tableInsert)(tableName, data).then((data) => {
+            res.send(data);
+        }).catch((error) => {
+            res.send(error);
+        });
+    }
+    else {
+        res.send('No table specified');
+    }
 });
 router.get('/test', request_1.requireToken, (req, res) => {
     console.log("Test DB");
