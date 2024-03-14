@@ -1,3 +1,6 @@
 # gsaServe
 Backend for gsa operation and request exexcution
-Technology : node express axios
+## Technology 
+* nodeJs
+* express
+* axios
