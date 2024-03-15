@@ -27,6 +27,7 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
     await client.connect()
     try {
         const res = await client.query(req);
+        console.log(res);
         if (res.rowCount >= 1) {
             return {
                 api: name,
