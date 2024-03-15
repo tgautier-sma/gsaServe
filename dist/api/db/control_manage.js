@@ -54,7 +54,8 @@ const execReq = async (name, req, fields = false) => {
  * @returns
  */
 const tableList = async () => {
-    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
+    // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
+    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
     return await execReq("tableList", req, true);
 };
 exports.tableList = tableList;

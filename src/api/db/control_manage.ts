@@ -51,7 +51,8 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
  * @returns 
  */
 export const tableList = async (): Promise<any> => {
-    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
+    // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
+    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
     return await execReq("tableList", req, true);
 }
 
