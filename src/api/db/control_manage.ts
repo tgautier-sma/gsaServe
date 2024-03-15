@@ -11,7 +11,7 @@ const config: any = {
 }
 if (process.env.NODE_ENV === 'production') {
     // Only for Production, need to connect with SSL
-    config['.ssl'] = { rejectUnauthorized: false };
+    config['.ssl'] = { rejectUnauthorized: true };
 }
 
 
