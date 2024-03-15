@@ -52,7 +52,11 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
  */
 export const tableList = async (): Promise<any> => {
     // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
-    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
+    // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
+    let req = `SELECT table_schema || '.' || table_name
+    FROM information_schema.tables
+    WHERE table_type = 'BASE TABLE'
+    AND table_schema NOT IN ('pg_catalog', 'information_schema');`;
     return await execReq("tableList", req, true);
 }
 
