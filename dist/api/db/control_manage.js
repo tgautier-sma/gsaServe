@@ -13,7 +13,7 @@ const config = {
 };
 if (process.env.NODE_ENV === 'production') {
     // Only for Production, need to connect with SSL
-    config['.ssl'] = { rejectUnauthorized: true };
+    config['.ssl'] = { rejectUnauthorized: false };
 }
 /**
  * execReq : core method to execute a SQL request
