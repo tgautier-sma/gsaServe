@@ -22,6 +22,12 @@ export const readDb = async (db: string, id: any, email: any, page: string, page
         return { totalCount: count.rows[0].count, page: page, pageSize: pageSize, rows: rows };
     }
 }
+export const getTables = async () => {
+    const client = await db.connect();
+    const ret = await client.sql`SELECT * from public.tableref`;
+    client.release();
+    return ret.rows;
+}
 export const testDb = async () => {
     const client = await db.connect();
     const ret = await client.sql`SELECT 1`;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreId = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.readDb = void 0;
+exports.deleteAuth = exports.updateAuth = exports.checkAuth = exports.getAuth = exports.createAuth = exports.deleteStoreId = exports.deleteStoreKey = exports.updateStoreKey = exports.createStoreKey = exports.getStoreApp = exports.getStoreKey = exports.getStores = exports.createApp = exports.getApp = exports.getApps = exports.testDb = exports.getTables = exports.readDb = void 0;
 const postgres_1 = require("@vercel/postgres");
 const utils_1 = require("../../utils");
 const readDb = async (db, id, email, page, pageSize) => {
@@ -24,6 +24,13 @@ const readDb = async (db, id, email, page, pageSize) => {
     }
 };
 exports.readDb = readDb;
+const getTables = async () => {
+    const client = await postgres_1.db.connect();
+    const ret = await client.sql `SELECT * from public.tableref`;
+    client.release();
+    return ret.rows;
+};
+exports.getTables = getTables;
 const testDb = async () => {
     const client = await postgres_1.db.connect();
     const ret = await client.sql `SELECT 1`;

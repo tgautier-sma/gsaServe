@@ -7,7 +7,8 @@ import {
     readDb, testDb,
     getApps, createApp, getApp,
     getStores, createStoreKey, updateStoreKey, deleteStoreId,
-    getStoreKey, getStoreApp
+    getStoreKey, getStoreApp,
+    getTables
 } from "./controller";
 import {
     tableCreate, tableList, tableDef, tableInsert, tableData
@@ -39,7 +40,7 @@ router.get('/query', (req, res) => {
     });
 });
 router.get('/table/list', (req, res) => {
-    tableList().then((data: any) => {
+    getTables().then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);
