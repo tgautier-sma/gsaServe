@@ -63,7 +63,7 @@ const execReq = async (name, req, fields = false) => {
  * @returns
  */
 const tableList = async () => {
-    let req = `SELECT * FROM TABLEREF;`;
+    let req = `SELECT * FROM public.TABLEREF;`;
     // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
     return await execReq("tableList", req, true);
 };
@@ -79,7 +79,7 @@ exports.tableList = tableList;
  */
 const tableCreate = async (table, fields) => {
     console.log(`(i) Create table ${table}, ${fields.length} fields`);
-    let req = `CREATE TABLE ${table} ( `;
+    let req = `CREATE TABLE public.${table} ( `;
     req = `${req} id serial NOT NULL, `;
     let f = [];
     fields.forEach((field) => {
@@ -99,7 +99,7 @@ const tableCreate = async (table, fields) => {
     const rc = await execReq("tableCreate", req);
     const ra = await (0, exports.tableAutoTimeStamp)(table);
     // Add table in TABLEREF table 
-    req = `INSERT INTO tableref ("name", "description") VALUES ('${table}', '${table}');`;
+    req = `INSERT INTO public.tableref ("name", "description") VALUES ('${table}', '${table}');`;
     const rt = await execReq("tableRefInsert", req);
     return { table: table, create: [rc, rt], autoTimestamp: ra };
 };
@@ -111,7 +111,7 @@ exports.tableCreate = tableCreate;
  */
 const tableAutoTimeStamp = async (table) => {
     const reqFunc = `
-CREATE OR REPLACE FUNCTION update_modified_column() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.update_modified_column() RETURNS TRIGGER AS $$
 BEGIN
 NEW.updated_on = now();
 RETURN NEW;
@@ -161,7 +161,7 @@ const tableInsert = async (table, data) => {
                 tvalue.push(vf);
             }
         });
-        let req = `INSERT INTO ${table} (${tname.join(',')}) VALUES(${tvalue.join(',')});`;
+        let req = `INSERT INTO public.${table} (${tname.join(',')}) VALUES(${tvalue.join(',')});`;
         reqList.push(req);
         console.log("Ajout de la requete n°", i);
         if (i % 10 == 0) {
@@ -188,8 +188,8 @@ const tableData = async (table, where = "", order = "", start = "1", limit = "10
     if (where.length > 1) {
         where = "AND (" + where + ")";
     }
-    let reqCount = `SELECT count(*) FROM ${table} ${where};`;
-    let req = `SELECT * FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
+    let reqCount = `SELECT count(*) FROM public.${table} ${where};`;
+    let req = `SELECT * public.FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
     const resCount = await execReq("tableCount", reqCount, true);
     // console.log(resCount);
     const res = await execReq("tableCount", req, true);
@@ -197,12 +197,15 @@ const tableData = async (table, where = "", order = "", start = "1", limit = "10
     return res;
 };
 exports.tableData = tableData;
+/**
+ * Database script to  init schema and table
+ */
 const initDataModel = async () => {
     const req = `
 -- public.tableref definition
 -- Drop table
 -- DROP TABLE tableref;
-CREATE TABLE tableref (
+CREATE TABLE public.tableref (
 	id serial4 NOT NULL,
 	"name" varchar(256) NULL,
 	description varchar(256) NULL,

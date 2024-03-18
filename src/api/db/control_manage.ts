@@ -1,4 +1,3 @@
-import { next } from 'cheerio/lib/api/traversing';
 import { Client } from 'pg';
 
 // Define configuration connection
@@ -61,7 +60,7 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
  * @returns 
  */
 export const tableList = async (): Promise<any> => {
-    let req = `SELECT * FROM TABLEREF;`;
+    let req = `SELECT * FROM public.TABLEREF;`;
     // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
     return await execReq("tableList", req, true);
 }
@@ -77,7 +76,7 @@ export const tableList = async (): Promise<any> => {
  */
 export const tableCreate = async (table: string, fields: any) => {
     console.log(`(i) Create table ${table}, ${fields.length} fields`);
-    let req = `CREATE TABLE ${table} ( `;
+    let req = `CREATE TABLE public.${table} ( `;
     req = `${req} id serial NOT NULL, `;
     let f: Array<string> = [];
     fields.forEach((field: any) => {
@@ -97,7 +96,7 @@ export const tableCreate = async (table: string, fields: any) => {
     const rc = await execReq("tableCreate", req);
     const ra = await tableAutoTimeStamp(table);
     // Add table in TABLEREF table 
-    req = `INSERT INTO tableref ("name", "description") VALUES ('${table}', '${table}');`
+    req = `INSERT INTO public.tableref ("name", "description") VALUES ('${table}', '${table}');`
     const rt = await execReq("tableRefInsert", req);
     return { table: table, create: [rc, rt], autoTimestamp: ra };
 }
@@ -108,7 +107,7 @@ export const tableCreate = async (table: string, fields: any) => {
  */
 export const tableAutoTimeStamp = async (table: string) => {
     const reqFunc = `
-CREATE OR REPLACE FUNCTION update_modified_column() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.update_modified_column() RETURNS TRIGGER AS $$
 BEGIN
 NEW.updated_on = now();
 RETURN NEW;
@@ -157,7 +156,7 @@ export const tableInsert = async (table: string, data: Array<any>) => {
                 tvalue.push(vf);
             }
         });
-        let req = `INSERT INTO ${table} (${tname.join(',')}) VALUES(${tvalue.join(',')});`;
+        let req = `INSERT INTO public.${table} (${tname.join(',')}) VALUES(${tvalue.join(',')});`;
         reqList.push(req);
         console.log("Ajout de la requete n°", i);
         if (i % 10 == 0) {
@@ -188,8 +187,8 @@ export const tableData = async (table: string,
     if (where.length > 1) {
         where = "AND (" + where + ")";
     }
-    let reqCount = `SELECT count(*) FROM ${table} ${where};`;
-    let req = `SELECT * FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
+    let reqCount = `SELECT count(*) FROM public.${table} ${where};`;
+    let req = `SELECT * public.FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
     const resCount=await execReq("tableCount", reqCount, true);
     // console.log(resCount);
     const res=await execReq("tableCount", req, true);
@@ -197,13 +196,15 @@ export const tableData = async (table: string,
     return res;
 }
 
-
+/**
+ * Database script to  init schema and table
+ */
 export const initDataModel = async () =>{
     const req=`
 -- public.tableref definition
 -- Drop table
 -- DROP TABLE tableref;
-CREATE TABLE tableref (
+CREATE TABLE public.tableref (
 	id serial4 NOT NULL,
 	"name" varchar(256) NULL,
 	description varchar(256) NULL,
