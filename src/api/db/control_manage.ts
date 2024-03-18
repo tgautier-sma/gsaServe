@@ -75,7 +75,7 @@ export const tableList = async (): Promise<any> => {
  * @returns 
  */
 export const tableCreate = async (table: string, fields: any) => {
-    console.log(`(i) Create table ${table}, ${fields.length} fields`);
+    console.log(`(i) Request to Create table ${table}, ${fields.length} fields`);
     let req = `CREATE TABLE public.${table} ( `;
     req = `${req} id serial NOT NULL, `;
     let f: Array<string> = [];
@@ -98,6 +98,7 @@ export const tableCreate = async (table: string, fields: any) => {
     // Add table in TABLEREF table 
     req = `INSERT INTO public.tableref ("name", "description") VALUES ('${table}', '${table}');`
     const rt = await execReq("tableRefInsert", req);
+    console.log(`(i) State of creating table ${table}`, rt);
     return { table: table, create: [rc, rt], autoTimestamp: ra };
 }
 /**

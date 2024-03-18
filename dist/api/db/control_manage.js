@@ -78,7 +78,7 @@ exports.tableList = tableList;
  * @returns
  */
 const tableCreate = async (table, fields) => {
-    console.log(`(i) Create table ${table}, ${fields.length} fields`);
+    console.log(`(i) Request to Create table ${table}, ${fields.length} fields`);
     let req = `CREATE TABLE public.${table} ( `;
     req = `${req} id serial NOT NULL, `;
     let f = [];
@@ -101,6 +101,7 @@ const tableCreate = async (table, fields) => {
     // Add table in TABLEREF table 
     req = `INSERT INTO public.tableref ("name", "description") VALUES ('${table}', '${table}');`;
     const rt = await execReq("tableRefInsert", req);
+    console.log(`(i) State of creating table ${table}`, rt);
     return { table: table, create: [rc, rt], autoTimestamp: ra };
 };
 exports.tableCreate = tableCreate;
