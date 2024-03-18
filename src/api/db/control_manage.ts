@@ -198,3 +198,37 @@ export const tableData = async (table: string,
 }
 
 
+export const initDataModel = async () =>{
+    const req=`
+-- public.tableref definition
+-- Drop table
+-- DROP TABLE tableref;
+CREATE TABLE tableref (
+	id serial4 NOT NULL,
+	"name" varchar(256) NULL,
+	description varchar(256) NULL,
+	created_on timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_on timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"data" json NULL,
+	CONSTRAINT tableref_pk PRIMARY KEY (id)
+);
+
+-- DROP FUNCTION public.update_modified_column();
+CREATE OR REPLACE FUNCTION public.update_modified_column()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+NEW.updated_on = now();
+RETURN NEW;
+END;
+$function$
+;
+
+-- Table Triggers
+create trigger update_modified_time before
+update
+    on
+    public.tableref for each row execute function update_modified_column();
+    `;
+}
