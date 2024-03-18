@@ -40,7 +40,7 @@ router.get('/query', (req, res) => {
     });
 });
 router.get('/table/list', (req, res) => {
-    getTables().then((data: any) => {
+    tableList().then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);

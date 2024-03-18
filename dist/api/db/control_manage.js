@@ -189,10 +189,10 @@ const tableData = async (table, where = "", order = "", start = "1", limit = "10
         where = "AND (" + where + ")";
     }
     let reqCount = `SELECT count(*) FROM public.${table} ${where};`;
-    let req = `SELECT * public.FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
+    let req = `SELECT * FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
     const resCount = await execReq("tableCount", reqCount, true);
     // console.log(resCount);
-    const res = await execReq("tableCount", req, true);
+    const res = await execReq("tableData", req, true);
     res.total = resCount.rows[0]['count'];
     return res;
 };
@@ -208,10 +208,11 @@ const initDataModel = async () => {
 CREATE TABLE public.tableref (
 	id serial4 NOT NULL,
 	"name" varchar(256) NULL,
-	description varchar(256) NULL,
+	"description" varchar(256) NULL,
+    "data" json NULL,
 	created_on timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_on timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"data" json NULL,
+	
 	CONSTRAINT tableref_pk PRIMARY KEY (id)
 );
 

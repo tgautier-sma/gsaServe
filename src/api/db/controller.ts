@@ -3,7 +3,6 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { sql, db } from "@vercel/postgres";
 import { genUniqueId } from '../../utils';
 
-
 export const readDb = async (db: string, id: any, email: any, page: string, pageSize: string) => {
     const offset = (+page - 1) * +pageSize;
     const dbName = db.toUpperCase();
@@ -22,11 +21,13 @@ export const readDb = async (db: string, id: any, email: any, page: string, page
         return { totalCount: count.rows[0].count, page: page, pageSize: pageSize, rows: rows };
     }
 }
+// Table TABLEREF = catalogue des tables utilsateurs
 export const getTables = async () => {
     const client = await db.connect();
+    console.log(client);
     const ret = await client.sql`SELECT * from public.tableref`;
     client.release();
-    return ret.rows;
+    return ret;
 }
 export const testDb = async () => {
     const client = await db.connect();
@@ -120,7 +121,6 @@ export const deleteStoreId = async (id: any) => {
         return ret;
     }
 }
-
 
 // Table AUTHS
 export const createAuth = async (name: any, email: any, password: any, secret: any) => {

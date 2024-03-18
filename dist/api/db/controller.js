@@ -24,11 +24,13 @@ const readDb = async (db, id, email, page, pageSize) => {
     }
 };
 exports.readDb = readDb;
+// Table TABLEREF = catalogue des tables utilsateurs
 const getTables = async () => {
     const client = await postgres_1.db.connect();
+    console.log(client);
     const ret = await client.sql `SELECT * from public.tableref`;
     client.release();
-    return ret.rows;
+    return ret;
 };
 exports.getTables = getTables;
 const testDb = async () => {

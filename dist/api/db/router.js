@@ -32,7 +32,7 @@ router.get('/query', (req, res) => {
     });
 });
 router.get('/table/list', (req, res) => {
-    (0, controller_1.getTables)().then((data) => {
+    (0, control_manage_1.tableList)().then((data) => {
         res.send(data);
     }).catch((error) => {
         res.send(error);
