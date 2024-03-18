@@ -1,3 +1,4 @@
+import { next } from 'cheerio/lib/api/traversing';
 import { Client } from 'pg';
 
 // Define configuration connection
@@ -27,14 +28,22 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
     await client.connect()
     try {
         const res = await client.query(req);
-        console.log(res);
-        if (res.rowCount >= 1) {
+        // console.log(res);
+        if (res.rowCount >= 0) {
+            // calculate the nex id, if exist
+            const rows = res.rows;
+            const arr = rows.map((item: any) => { return item['id']; });
+            const maxId = Math.max(...arr);
+            const minId = Math.min(...arr);
             return {
                 api: name,
                 status: "ok",
+                req: req,
                 rowCount: res.rowCount,
-                rowAsArray: res.rowAsArray,
+                minId:minId,
+                maxId:maxId,
                 rows: res.rows,
+                rowAsArray: res.rowAsArray,
                 fields: fields ? res.fields : null
             }
         } else {
@@ -42,7 +51,7 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
         }
     } catch (err) {
         console.error(err);
-        return { api: name, status: "error", message: err.message, result: err };
+        return { api: name, status: "error", message: err.message, result: err, req: req };
     } finally {
         await client.end()
     }
@@ -52,7 +61,7 @@ const execReq = async (name: any, req: any, fields: boolean = false): Promise<an
  * @returns 
  */
 export const tableList = async (): Promise<any> => {
-    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
+    let req = `SELECT * FROM TABLEREF;`;
     // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
     return await execReq("tableList", req, true);
 }
@@ -87,7 +96,10 @@ export const tableCreate = async (table: string, fields: any) => {
     req = req + " );";
     const rc = await execReq("tableCreate", req);
     const ra = await tableAutoTimeStamp(table);
-    return { table: table, create: rc, autoTimestamp: ra };
+    // Add table in TABLEREF table 
+    req = `INSERT INTO tableref ("name", "description") VALUES ('${table}', '${table}');`
+    const rt = await execReq("tableRefInsert", req);
+    return { table: table, create: [rc, rt], autoTimestamp: ra };
 }
 /**
  * Add a function and a trigger to execute an automatic update of the row modified timestamp
@@ -143,7 +155,7 @@ export const tableInsert = async (table: string, data: Array<any>) => {
                 let vf = "'" + v + "'";
                 tname.push(field)
                 tvalue.push(vf);
-            } 
+            }
         });
         let req = `INSERT INTO ${table} (${tname.join(',')}) VALUES(${tvalue.join(',')});`;
         reqList.push(req);
@@ -167,3 +179,22 @@ export const tableInsert = async (table: string, data: Array<any>) => {
     });
     return { script: scriptList, result: scriptListResult };
 }
+
+export const tableData = async (table: string,
+    where: string = "",
+    order: string = "",
+    start: string = "1",
+    limit: string = "10") => {
+    if (where.length > 1) {
+        where = "AND (" + where + ")";
+    }
+    let reqCount = `SELECT count(*) FROM ${table} ${where};`;
+    let req = `SELECT * FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
+    const resCount=await execReq("tableCount", reqCount, true);
+    // console.log(resCount);
+    const res=await execReq("tableCount", req, true);
+    res.total=resCount.rows[0]['count'];
+    return res;
+}
+
+

@@ -10,7 +10,7 @@ import {
     getStoreKey, getStoreApp
 } from "./controller";
 import {
-    tableCreate, tableList, tableDef, tableInsert
+    tableCreate, tableList, tableDef, tableInsert, tableData
 } from "./control_manage";
 
 
@@ -40,6 +40,24 @@ router.get('/query', (req, res) => {
 });
 router.get('/table/list', (req, res) => {
     tableList().then((data: any) => {
+        res.send(data);
+    }).catch((error: any) => {
+        res.send(error);
+    });
+});
+router.get('/table/data', (req, res) => {
+    const table = req.query.table || null;
+    const where = req.query.where || null;
+    const order = req.query.order || null;
+    const start = req.query.start || "1";
+    const limit = req.query.limit || "10";
+
+    const tableName: string = table.toString();
+    const clauseWhere: string = (where ? where.toString() : "");
+    const clauseOrder: string = (order ? order.toString() : "");
+    const clauseStart: string = start.toString();
+    const clauseLimit: string = limit.toString();
+    tableData(tableName,clauseWhere,clauseOrder,clauseStart,clauseLimit).then((data: any) => {
         res.send(data);
     }).catch((error: any) => {
         res.send(error);

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tableInsert = exports.tableDef = exports.tableAutoTimeStamp = exports.tableCreate = exports.tableList = void 0;
+exports.tableData = exports.tableInsert = exports.tableDef = exports.tableAutoTimeStamp = exports.tableCreate = exports.tableList = void 0;
 const pg_1 = require("pg");
 // Define configuration connection
 const env = process.env;
@@ -27,14 +27,22 @@ const execReq = async (name, req, fields = false) => {
     await client.connect();
     try {
         const res = await client.query(req);
-        console.log(res);
-        if (res.rowCount >= 1) {
+        // console.log(res);
+        if (res.rowCount >= 0) {
+            // calculate the nex id, if exist
+            const rows = res.rows;
+            const arr = rows.map((item) => { return item['id']; });
+            const maxId = Math.max(...arr);
+            const minId = Math.min(...arr);
             return {
                 api: name,
                 status: "ok",
+                req: req,
                 rowCount: res.rowCount,
-                rowAsArray: res.rowAsArray,
+                minId: minId,
+                maxId: maxId,
                 rows: res.rows,
+                rowAsArray: res.rowAsArray,
                 fields: fields ? res.fields : null
             };
         }
@@ -44,7 +52,7 @@ const execReq = async (name, req, fields = false) => {
     }
     catch (err) {
         console.error(err);
-        return { api: name, status: "error", message: err.message, result: err };
+        return { api: name, status: "error", message: err.message, result: err, req: req };
     }
     finally {
         await client.end();
@@ -55,7 +63,7 @@ const execReq = async (name, req, fields = false) => {
  * @returns
  */
 const tableList = async () => {
-    let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';`;
+    let req = `SELECT * FROM TABLEREF;`;
     // let req = `SELECT * FROM pg_catalog.pg_tables WHERE schemaname='public';`;
     return await execReq("tableList", req, true);
 };
@@ -90,7 +98,10 @@ const tableCreate = async (table, fields) => {
     req = req + " );";
     const rc = await execReq("tableCreate", req);
     const ra = await (0, exports.tableAutoTimeStamp)(table);
-    return { table: table, create: rc, autoTimestamp: ra };
+    // Add table in TABLEREF table 
+    req = `INSERT INTO tableref ("name", "description") VALUES ('${table}', '${table}');`;
+    const rt = await execReq("tableRefInsert", req);
+    return { table: table, create: [rc, rt], autoTimestamp: ra };
 };
 exports.tableCreate = tableCreate;
 /**
@@ -173,4 +184,17 @@ const tableInsert = async (table, data) => {
     return { script: scriptList, result: scriptListResult };
 };
 exports.tableInsert = tableInsert;
+const tableData = async (table, where = "", order = "", start = "1", limit = "10") => {
+    if (where.length > 1) {
+        where = "AND (" + where + ")";
+    }
+    let reqCount = `SELECT count(*) FROM ${table} ${where};`;
+    let req = `SELECT * FROM ${table} WHERE id >= ${start} ${where} LIMIT ${limit};`;
+    const resCount = await execReq("tableCount", reqCount, true);
+    // console.log(resCount);
+    const res = await execReq("tableCount", req, true);
+    res.total = resCount.rows[0]['count'];
+    return res;
+};
+exports.tableData = tableData;
 //# sourceMappingURL=control_manage.js.map

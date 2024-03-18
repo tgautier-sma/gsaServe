@@ -38,6 +38,23 @@ router.get('/table/list', (req, res) => {
         res.send(error);
     });
 });
+router.get('/table/data', (req, res) => {
+    const table = req.query.table || null;
+    const where = req.query.where || null;
+    const order = req.query.order || null;
+    const start = req.query.start || "1";
+    const limit = req.query.limit || "10";
+    const tableName = table.toString();
+    const clauseWhere = (where ? where.toString() : "");
+    const clauseOrder = (order ? order.toString() : "");
+    const clauseStart = start.toString();
+    const clauseLimit = limit.toString();
+    (0, control_manage_1.tableData)(tableName, clauseWhere, clauseOrder, clauseStart, clauseLimit).then((data) => {
+        res.send(data);
+    }).catch((error) => {
+        res.send(error);
+    });
+});
 router.post('/table/create', (req, res) => {
     const table = req.query.table || null;
     const tableName = table.toString();
