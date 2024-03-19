@@ -15,7 +15,6 @@ import {
 } from "./control_manage";
 
 
-
 router.get('/', requireToken, (req, res) => {
     res.send("👍 Server db working well!");
 })

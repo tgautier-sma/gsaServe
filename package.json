@@ -4,7 +4,7 @@
   "description": "Serveur Node pour appels simples",
   "main": "index.js",
   "scripts": {
-    "start": "set NODE_ENV=development && nodemon src/index.ts",
+    "start": "set NODE_ENV=development&& nodemon src/index.ts",
     "build": "rimraf dist && tsc",
     "docker.build": "docker build . -t gsa_serve",
     "docker.run": "docker run -d -p 3000:3000 gsa_serve",
